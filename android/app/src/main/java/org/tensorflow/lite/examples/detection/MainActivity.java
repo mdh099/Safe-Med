@@ -32,7 +32,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.3f;
+    public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
         for (final Classifier.Recognition result : results) {
             final RectF location = result.getLocation();
+            // System.out.println("here");
             if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
                 canvas.drawRect(location, paint);
 //                cropToFrameTransform.mapRect(location);

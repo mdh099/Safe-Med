@@ -242,7 +242,7 @@ public class YoloV5Classifier implements Classifier {
     private static final int NUM_BOXES_PER_BLOCK = 3;
 
     // Number of threads in the java app
-    private static final int NUM_THREADS = 1;
+    private static final int NUM_THREADS = 4;
     private static boolean isNNAPI = false;
     private static boolean isGPU = false;
 
@@ -386,10 +386,11 @@ public class YoloV5Classifier implements Classifier {
         }
         return imgData;
     }
-
+    private int imageCounter = 0;
     public ArrayList<Recognition> recognizeImage(Bitmap bitmap) {
 
-
+        imageCounter++;
+        System.out.println("Starting image: " + imageCounter);
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
         ArrayList<Recognition> detections = new ArrayList<Recognition>();
         Map<Integer, Object> outputMap = new HashMap<>();
@@ -402,6 +403,8 @@ public class YoloV5Classifier implements Classifier {
         float[][][] bboxes = (float [][][]) outputMap.get(0);
         float[][][] out_score = (float[][][]) outputMap.get(1);
 
+        Recognition best = null;
+        float bestScore = -1;
         for (int i = 0; i < gridWidth;i++){
             float maxClass = 0;
             int detectedClass = -1;
@@ -417,6 +420,7 @@ public class YoloV5Classifier implements Classifier {
             }
             final float score = maxClass;
             if (score > getObjThresh()){
+                System.out.println(imageCounter + " " + score);
                 final float xPos = bboxes[0][i][0];
                 final float yPos = bboxes[0][i][1];
                 final float w = bboxes[0][i][2];
@@ -426,9 +430,17 @@ public class YoloV5Classifier implements Classifier {
                         Math.max(0, yPos - h / 2),
                         Math.min(bitmap.getWidth() - 1, xPos + w / 2),
                         Math.min(bitmap.getHeight() - 1, yPos + h / 2));
+//                Recognition temp = new Recognition("" + i, labels.get(detectedClass),score,rectF,detectedClass );
+//                if (score > bestScore){
+//                    best = temp;
+//                    bestScore = score;
+//                }
                 detections.add(new Recognition("" + i, labels.get(detectedClass),score,rectF,detectedClass ));
             }
         }
+        if (best != null)
+            detections.add(best);
+        // System.out.println(detections);
         return detections;
 
 

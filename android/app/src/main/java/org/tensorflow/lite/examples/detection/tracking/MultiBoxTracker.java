@@ -38,7 +38,7 @@ import org.tensorflow.lite.examples.detection.tflite.Classifier.Recognition;
 /** A tracker that handles non-max suppression and matches existing objects to new detections. */
 public class MultiBoxTracker {
   private static final float TEXT_SIZE_DIP = 18;
-  private static final float MIN_SIZE = 16.0f;
+  private static final float MIN_SIZE = 0;
   private static final int[] COLORS = {
           Color.BLUE,
           Color.RED,
@@ -136,21 +136,21 @@ public class MultiBoxTracker {
                     false);
     for (final TrackedRecognition recognition : trackedObjects) {
       final RectF trackedPos = new RectF(recognition.location);
-
+      // System.out.println(trackedPos.width() + " " + trackedPos.height());
       getFrameToCanvasMatrix().mapRect(trackedPos);
       boxPaint.setColor(recognition.color);
 
       float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;
       canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
 
-      final String labelString =
-              !TextUtils.isEmpty(recognition.title)
-                      ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
-                      : String.format("%.2f", (100 * recognition.detectionConfidence));
-      //            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.top,
-      // labelString);
-      borderedText.drawText(
-              canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
+//      final String labelString =
+//              !TextUtils.isEmpty(recognition.title)
+//                      ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
+//                      : String.format("%.2f", (100 * recognition.detectionConfidence));
+//      //            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.top,
+//      // labelString);
+//      borderedText.drawText(
+//              canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
     }
   }
 
