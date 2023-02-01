@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         cameraButton.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, DetectorActivity.class)));
 
         detectButton.setOnClickListener(v -> {
+            System.out.println("we are entering into here?");
             Handler handler = new Handler();
 
             new Thread(() -> {
@@ -80,7 +81,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
 
-    private static final String TF_OD_API_MODEL_FILE = "yolov5s.tflite";
+    private static final String TF_OD_API_MODEL_FILE = "barrel_detect-416-version.tflite";
+
+    private static final String TF_OD_API_MODEL_FILE_Plunger = "plunger_detect-416-version.tflite";
+
+    private static final String TF_OD_API_MODEL_FILE_Line = "line_count-416-version.tflite";
 
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
 
@@ -89,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
     private Integer sensorOrientation = 90;
 
     private Classifier detector;
+    private Classifier detectorLines;
+    private Classifier detectorPlunger;
 
     private Matrix frameToCropTransform;
     private Matrix cropToFrameTransform;
@@ -128,6 +135,20 @@ public class MainActivity extends AppCompatActivity {
                     YoloV5Classifier.create(
                             getAssets(),
                             TF_OD_API_MODEL_FILE,
+                            TF_OD_API_LABELS_FILE,
+                            TF_OD_API_IS_QUANTIZED,
+                            TF_OD_API_INPUT_SIZE);
+            detectorLines =
+                    YoloV5Classifier.create(
+                            getAssets(),
+                            TF_OD_API_MODEL_FILE_Line,
+                            TF_OD_API_LABELS_FILE,
+                            TF_OD_API_IS_QUANTIZED,
+                            TF_OD_API_INPUT_SIZE);
+            detectorPlunger =
+                    YoloV5Classifier.create(
+                            getAssets(),
+                            TF_OD_API_MODEL_FILE_Plunger,
                             TF_OD_API_LABELS_FILE,
                             TF_OD_API_IS_QUANTIZED,
                             TF_OD_API_INPUT_SIZE);
