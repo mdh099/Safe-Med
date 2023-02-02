@@ -4,6 +4,8 @@ import android.content.res.AssetManager;
 
 import java.io.IOException;
 
+import edu.ucf.safemed.Constants;
+
 public class DetectorFactory {
     public static YoloV5Classifier getDetector(
             final AssetManager assetManager,
@@ -11,61 +13,14 @@ public class DetectorFactory {
             throws IOException {
         String labelFilename = null;
         boolean isQuantized = false;
-        int inputSize = 0;
-        int[] output_width = new int[]{0};
-        int[][] masks = new int[][]{{0}};
-        int[] anchors = new int[]{0};
-        if (modelFilename.equals("barrel_detect-416-version.tflite")) {
-            labelFilename = "file:///android_asset/customclasses.txt";
-            isQuantized = false;
-            inputSize = 416;
-            output_width = new int[]{80, 40, 20};
-            masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
-            anchors = new int[]{
-                    10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326
-            };
-        }
-        else if (modelFilename.equals("plunger_detect-416-version.tflite")) {
-            labelFilename = "file:///android_asset/customclasses.txt";
-            isQuantized = false;
-            inputSize = 416;
-            output_width = new int[]{80, 40, 20};
-            masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
-            anchors = new int[]{
-                    10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326
-            };
-        }
-        else if (modelFilename.equals("line_count-416-version.tflite")) {
-            labelFilename = "file:///android_asset/customclasses.txt";
-            isQuantized = false;
-            inputSize = 416;
-            output_width = new int[]{80, 40, 20};
-            masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
-            anchors = new int[]{
-                    10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326
-            };
-        }
-        else if (modelFilename.equals("best-fp16.tflite")) {
-            labelFilename = "file:///android_asset/customclasses.txt";
-            isQuantized = false;
-            inputSize = 416;
-            output_width = new int[]{40, 20, 10};
-            masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
-            anchors = new int[]{
-                    10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326
-            };
-        }
-        else if (modelFilename.equals("barrel_detect-416-version.tflite")) {
-            labelFilename = "file:///android_asset/customclasses.txt";
-            isQuantized = true;
-            inputSize = 416;
-            output_width = new int[]{40, 20, 10};
-            masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
-            anchors = new int[]{
-                    10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326
-            };
-        }
-        return YoloV5Classifier.create(assetManager, modelFilename, labelFilename, isQuantized,
+        int inputSize = 416;
+        int[] output_width = new int[]{80, 40, 20};
+        int[][]  masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
+        int[] anchors = new int[]{
+                10,13, 16,30, 33,23, 30,61, 62,45, 59,119, 116,90, 156,198, 373,326
+        };
+
+        return YoloV5Classifier.create(assetManager, modelFilename, Constants.CUSTOM_CLASSES_PATH, isQuantized,
                 inputSize);
     }
 

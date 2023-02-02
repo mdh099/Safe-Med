@@ -23,7 +23,7 @@ import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.Tensor;
-import edu.ucf.safemed.MainActivity;
+
 import edu.ucf.safemed.env.Utils;
 import org.tensorflow.lite.gpu.GpuDelegate;
 import org.tensorflow.lite.nnapi.NnApiDelegate;
