@@ -44,4 +44,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
     implementation 'org.tensorflow:tensorflow-lite:2.5.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.4.0'
+
+    implementation 'com.airbnb.android:lottie:5.2.0'
 }

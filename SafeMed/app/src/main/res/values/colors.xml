@@ -8,14 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="tfe_color_primary">#ffa800</color>
-    <color name="tfe_color_primary_dark">#ff6f00</color>
-    <color name="tfe_color_accent">#425066</color>
+    <color name="tfe_color_primary">#78CDD7</color>
+    <color name="tfe_color_primary_dark">#0E4749 </color>
+    <color name="tfe_color_accent">#44A1A0</color>
 
     <color name="tfe_semi_transparent">#66000000</color>
 
     <color name="control_background">#cc4285f4</color>
     <color name="selection_highlight">#aaaaaa</color>
     <color name="selection_focus">#eeaa55</color>
-    <color name="item_normal">#eeeeee</color>
+    <color name="item_normal">#FFFFFA</color>
 </resources>

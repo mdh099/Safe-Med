@@ -21,6 +21,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -57,13 +58,13 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import edu.ucf.safemed.env.ImageUtils;
 
 public abstract class CameraActivity extends AppCompatActivity
         implements OnImageAvailableListener,
         Camera.PreviewCallback,
-//        CompoundButton.OnCheckedChangeListener,
         View.OnClickListener {
     private static final Logger LOGGER = Logger.getLogger(CameraActivity.class.getName());
 
@@ -71,6 +72,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
     private static final String ASSET_PATH = "";
+
     protected int previewWidth = 0;
     protected int previewHeight = 0;
     private boolean debug = false;
@@ -83,6 +85,7 @@ public abstract class CameraActivity extends AppCompatActivity
     private int yRowStride;
     protected int defaultModelIndex = 0;
     protected int defaultDeviceIndex = 0;
+
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
     protected ArrayList<String> modelStrings = new ArrayList<String>();
@@ -97,12 +100,13 @@ public abstract class CameraActivity extends AppCompatActivity
     protected ListView deviceView;
     protected TextView threadsTextView;
     protected ListView modelView;
+
     /** Current indices of device and model. */
     int currentDevice = -1;
     int currentModel = -1;
     int currentNumThreads = -1;
 
-    ArrayList<String> deviceStrings = new ArrayList<String>();
+    ArrayList<String> deviceStrings = new ArrayList<>(Arrays.asList("CPU", "GPU", "NNAPI"));
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -126,9 +130,7 @@ public abstract class CameraActivity extends AppCompatActivity
         plusImageView = findViewById(R.id.plus);
         minusImageView = findViewById(R.id.minus);
         deviceView = findViewById(R.id.device_list);
-        deviceStrings.add("CPU");
-        deviceStrings.add("GPU");
-        deviceStrings.add("NNAPI");
+
         deviceView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         ArrayAdapter<String> deviceAdapter =
                 new ArrayAdapter<>(
@@ -221,8 +223,6 @@ public abstract class CameraActivity extends AppCompatActivity
         minusImageView.setOnClickListener(this);
     }
 
-
-
     protected ArrayList<String> getModelStrings(AssetManager mgr, String path){
         ArrayList<String> res = new ArrayList<String>();
         try {
@@ -246,14 +246,6 @@ public abstract class CameraActivity extends AppCompatActivity
         return rgbBytes;
     }
 
-    protected int getLuminanceStride() {
-        return yRowStride;
-    }
-
-    protected byte[] getLuminance() {
-        return yuvBytes[0];
-    }
-
     /** Callback for android.hardware.Camera API */
     @Override
     public void onPreviewFrame(final byte[] bytes, final Camera camera) {
@@ -266,6 +258,12 @@ public abstract class CameraActivity extends AppCompatActivity
             // Initialize the storage bitmaps once when the resolution is known.
             if (rgbBytes == null) {
                 Camera.Size previewSize = camera.getParameters().getPreviewSize();
+                /*
+                CameraManager cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+                CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+                StreamConfigurationMap streamConfigMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                Size previewSize = streamConfigMap.getOutputSizes(SurfaceTexture.class)[0];
+                */
                 previewHeight = previewSize.height;
                 previewWidth = previewSize.width;
                 rgbBytes = new int[previewWidth * previewHeight];
@@ -292,7 +290,7 @@ public abstract class CameraActivity extends AppCompatActivity
                 new Runnable() {
                     @Override
                     public void run() {
-                        camera.addCallbackBuffer(bytes);
+                                camera.addCallbackBuffer(bytes);
                         isProcessingFrame = false;
                     }
                 };
@@ -550,13 +548,13 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
     protected void readyForNextImage() {
-        if (postInferenceCallback != null) {
+        if (this.postInferenceCallback != null) {
             postInferenceCallback.run();
         }
     }
 
     protected int getScreenOrientation() {
-        switch (getWindowManager().getDefaultDisplay().getRotation()) {
+        switch (this.getWindowManager().getDefaultDisplay().getRotation()) {
             case Surface.ROTATION_270:
                 return 270;
             case Surface.ROTATION_180:
@@ -568,32 +566,23 @@ public abstract class CameraActivity extends AppCompatActivity
         }
     }
 
-//  @Override
-//  public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//    setUseNNAPI(isChecked);
-//    if (isChecked) apiSwitchCompat.setText("NNAPI");
-//    else apiSwitchCompat.setText("TFLITE");
-//  }
-
     @Override
     public void onClick(View v) {
+        String threads = threadsTextView.getText().toString().trim();
+        int numThreads = Integer.parseInt(threads);
+
         if (v.getId() == R.id.plus) {
-            String threads = threadsTextView.getText().toString().trim();
-            int numThreads = Integer.parseInt(threads);
             if (numThreads >= 9) return;
             numThreads++;
-            threadsTextView.setText(String.valueOf(numThreads));
-            setNumThreads(numThreads);
-        } else if (v.getId() == R.id.minus) {
-            String threads = threadsTextView.getText().toString().trim();
-            int numThreads = Integer.parseInt(threads);
-            if (numThreads == 1) {
-                return;
-            }
+        } 
+
+        if (v.getId() == R.id.minus) {
+            if (numThreads == 1) return;
             numThreads--;
-            threadsTextView.setText(String.valueOf(numThreads));
-            setNumThreads(numThreads);
         }
+
+        threadsTextView.setText(String.valueOf(numThreads));
+        setNumThreads(numThreads);
     }
 
     protected void showFrameInfo(String frameInfo) {
@@ -609,7 +598,6 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
     protected abstract void updateActiveModel();
-    protected abstract void processImage();
     protected abstract void startPipeline();
 
     protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
@@ -619,6 +607,4 @@ public abstract class CameraActivity extends AppCompatActivity
     protected abstract Size getDesiredPreviewFrameSize();
 
     protected abstract void setNumThreads(int numThreads);
-
-    protected abstract void setUseNNAPI(boolean isChecked);
 }

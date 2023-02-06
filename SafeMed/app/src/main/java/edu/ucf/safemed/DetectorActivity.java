@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
 import android.util.Log;
@@ -41,7 +42,6 @@ import edu.ucf.safemed.tracking.MultiBoxTracker;
 public class DetectorActivity extends CameraActivity implements OnImageAvailableListener {
     private static final Logger LOGGER = Logger.getLogger(DetectorActivity.class.getName());
 
-    private static final DetectorMode MODE = DetectorMode.TF_OD_API;
     private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.3f;
     private static final boolean MAINTAIN_ASPECT = true;
     private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 640);
@@ -205,89 +205,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     @Override
-    protected void processImage() {
-        ++timestamp;
-        final long currTimestamp = timestamp;
-        trackingOverlay.postInvalidate();
-
-        // No mutex needed as this method is not reentrant.
-        if (computingDetection) {
-            readyForNextImage();
-            return;
-        }
-        computingDetection = true;
-        LOGGER.info("Preparing image " + currTimestamp + " for detection in bg thread.");
-
-        rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-
-        readyForNextImage();
-
-        final Canvas canvas = new Canvas(croppedBitmap);
-        canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
-        // For examining the actual TF input.
-        if (SAVE_PREVIEW_BITMAP) {
-            ImageUtils.saveBitmap(croppedBitmap);
-        }
-
-        runInBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        LOGGER.info("Running detection on image " + currTimestamp);
-                        final long startTime = SystemClock.uptimeMillis();
-                        final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
-                        lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-
-                        Log.e("CHECK", "run: " + results.size());
-
-                        cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
-                        final Canvas canvas = new Canvas(cropCopyBitmap);
-                        final Paint paint = new Paint();
-                        paint.setColor(Color.RED);
-                        paint.setStyle(Style.STROKE);
-                        paint.setStrokeWidth(2.0f);
-
-                        float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-                        switch (MODE) {
-                            case TF_OD_API:
-                                minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-                                break;
-                        }
-
-                        final List<Classifier.Recognition> mappedRecognitions =
-                                new LinkedList<Classifier.Recognition>();
-
-                        for (final Classifier.Recognition result : results) {
-                            final RectF location = result.getLocation();
-                            if (location != null && result.getConfidence() >= minimumConfidence) {
-                                canvas.drawRect(location, paint);
-
-                                cropToFrameTransform.mapRect(location);
-
-                                result.setLocation(location);
-                                mappedRecognitions.add(result);
-                            }
-                        }
-
-                        tracker.trackResults(mappedRecognitions, currTimestamp);
-                        trackingOverlay.postInvalidate();
-
-                        computingDetection = false;
-
-                        runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showFrameInfo(previewWidth + "x" + previewHeight);
-                                        showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
-                                        showInference(lastProcessingTimeMs + "ms");
-                                    }
-                                });
-                    }
-                });
-    }
-
-    @Override
     protected int getLayoutId() {
         return R.layout.tfe_od_camera_connection_fragment_tracking;
     }
@@ -295,17 +212,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     @Override
     protected Size getDesiredPreviewFrameSize() {
         return DESIRED_PREVIEW_SIZE;
-    }
-
-    // Which detection model to use: by default uses Tensorflow Object Detection API frozen
-    // checkpoints.
-    private enum DetectorMode {
-        TF_OD_API;
-    }
-
-    @Override
-    protected void setUseNNAPI(final boolean isChecked) {
-        runInBackground(() -> detector.setUseNNAPI(isChecked));
     }
 
     @Override
@@ -359,19 +265,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         paint.setStyle(Style.STROKE);
         paint.setStrokeWidth(2.0f);
 
-        float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-        switch (MODE) {
-            case TF_OD_API:
-                minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-                break;
-        }
-
         final List<Classifier.Recognition> mappedRecognitions =
                 new LinkedList<Classifier.Recognition>();
 
         for (final Classifier.Recognition result : results) {
             final RectF location = result.getLocation();
-            if (location != null && result.getConfidence() >= minimumConfidence) {
+            if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
                 canvas.drawRect(location, paint);
 
                 cropToFrameTransform.mapRect(location);
