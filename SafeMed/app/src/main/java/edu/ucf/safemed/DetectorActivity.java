@@ -308,6 +308,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     @Override
     protected void startPipeline() {
+//        openDialog();
         ++timestamp;
         final long currTimestamp = timestamp;
         trackingOverlay.postInvalidate();
