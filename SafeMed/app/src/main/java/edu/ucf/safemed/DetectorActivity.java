@@ -70,6 +70,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private BorderedText borderedText;
 
+    public void openDialog(){
+        DialogProcess dialog = new DialogProcess();
+        dialog.show(getSupportFragmentManager(), "example dialog");
+    }
+
     @Override
     public void onPreviewSizeChosen(final Size size, final int rotation) {
         final float textSizePx =
@@ -291,6 +296,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
         if (boundingBox != null){
+            openDialog();
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
