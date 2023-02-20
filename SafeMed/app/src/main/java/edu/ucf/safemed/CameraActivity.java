@@ -327,30 +327,24 @@ public abstract class CameraActivity extends AppCompatActivity
             final int uvPixelStride = planes[1].getPixelStride();
 
             imageConverter =
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            ImageUtils.convertYUV420ToARGB8888(
-                                    yuvBytes[0],
-                                    yuvBytes[1],
-                                    yuvBytes[2],
-                                    previewWidth,
-                                    previewHeight,
-                                    yRowStride,
-                                    uvRowStride,
-                                    uvPixelStride,
-                                    rgbBytes);
-                        }
+                    () -> {
+                        ImageUtils.convertYUV420ToARGB8888(
+                                yuvBytes[0],
+                                yuvBytes[1],
+                                yuvBytes[2],
+                                previewWidth,
+                                previewHeight,
+                                yRowStride,
+                                uvRowStride,
+                                uvPixelStride,
+                                rgbBytes);
                     };
 
             postInferenceCallback =
-                    new Runnable() {
-                        @Override
-                        public void run() {
+                    () -> {
                             image.close();
                             isProcessingFrame = false;
-                        }
-                    };
+                        };
 
             startPipeline();
         } catch (final Exception e) {
