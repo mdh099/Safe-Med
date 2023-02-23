@@ -22,27 +22,32 @@
     android:background="#00000000">
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/tfe_color_primary"
         android:orientation="vertical">
 
-
-        <FrameLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/container"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="org.tensorflow.demo.CameraActivity" />
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/addSyringe"
+            android:layout_marginLeft="19dp"
+            android:layout_marginTop="11dp"
+            android:layout_toRightOf="@id/addSyringe"
+            android:clickable="true"
+            android:src="@drawable/ic_baseline_add" />
+
+        <TableRow
+            android:id="@+id/Title"
+            android:layout_width="match_parent"
+            android:layout_height="56dp" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:layout_alignParentTop="true"
             android:background="@color/tfe_semi_transparent">
 
             <ImageView
@@ -51,9 +56,27 @@
                 android:src="@drawable/safemed_banner" />
         </androidx.appcompat.widget.Toolbar>
 
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="600dp"
+            android:layout_below="@id/Title"
+            tools:context="org.tensorflow.demo.CameraActivity"></FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/addSyringe"
+            android:layout_width="312dp"
+            android:layout_height="79dp"
+            android:layout_below="@id/container"
+            android:layout_marginTop="-4dp">
+
+        </RelativeLayout>
+
     </RelativeLayout>
 
     <include
         android:id="@+id/bottom_sheet_layout"
-        layout="@layout/tfe_od_layout_bottom_sheet" />
+        layout="@layout/tfe_od_layout_bottom_sheet"
+        android:visibility="gone"
+        tools:visibility="gone" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
