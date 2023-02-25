@@ -1,5 +1,6 @@
 package edu.ucf.safemed;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
@@ -11,13 +12,17 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
-import android.os.SystemClock;
-import android.util.Log;
+import android.os.Bundle;
 import android.util.Size;
 import android.util.TypedValue;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -73,6 +78,47 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     public void openDialog(){
         DialogProcess dialog = new DialogProcess();
         dialog.show(getSupportFragmentManager(), "example dialog");
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        createSyringeDialog();
+        addSyringeButton = findViewById(R.id.floatingActionButton);
+        addSyringeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                syringeDialog.show();
+            }
+        });
+    }
+
+    private String name = null, volume = null, units = null, numberOfLines = null;
+    private AlertDialog syringeDialog;
+    private FloatingActionButton addSyringeButton;
+
+    public void createSyringeDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Syringe Information");
+        View view = getLayoutInflater().inflate(R.layout.syringe_dialog, null);
+        EditText eName, eVolume, eUnits, eLines;
+        eName = view.findViewById(R.id.name);
+        eVolume = view.findViewById(R.id.volume);
+        eUnits = view.findViewById(R.id.units);
+        eLines = view.findViewById(R.id.lines);
+        Button submit = view.findViewById(R.id.submit);
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                name = eName.getText().toString();
+                volume = eVolume.getText().toString();
+                units = eUnits.getText().toString();
+                numberOfLines = eUnits.getText().toString();
+                syringeDialog.dismiss();
+            }
+        });
+        builder.setView(view);
+        syringeDialog = builder.create();
     }
 
     @Override
