@@ -33,7 +33,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.dialog_box, null);
 
     builder.setView(view)
-            .setTitle("Login");
+            .setTitle("");
 //    bar = view.findViewById(R.id.progressBar);
 
 

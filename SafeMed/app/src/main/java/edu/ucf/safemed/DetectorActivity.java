@@ -76,14 +76,19 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private BorderedText borderedText;
 
     public void openDialog(){
-        DialogProcess dialog = new DialogProcess();
-        dialog.show(getSupportFragmentManager(), "example dialog");
+        loadingDialog.show();
     }
+
+    public void dismissDialog(){
+        loadingDialog.dismiss();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         createSyringeDialog();
+        createLoadingDialog();
         addSyringeButton = findViewById(R.id.floatingActionButton);
         addSyringeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +125,18 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         builder.setView(view);
         syringeDialog = builder.create();
     }
+
+    private AlertDialog loadingDialog;
+    public void createLoadingDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("");
+        View view = getLayoutInflater().inflate(R.layout.dialog_box, null);
+        builder.setView(view);
+        loadingDialog = builder.create();
+        loadingDialog.setCancelable(false);
+    }
+
+
 
     @Override
     public void onPreviewSizeChosen(final Size size, final int rotation) {
@@ -342,7 +359,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
         if (boundingBox != null){
-            openDialog();
+//            openDialog();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    openDialog();
+                }
+            });
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
