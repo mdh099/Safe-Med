@@ -2,11 +2,9 @@ package edu.ucf.safemed;
 
 import android.app.ProgressDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
@@ -30,7 +28,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
     ProgressDialog.Builder builder = new ProgressDialog.Builder(getActivity());
 
     LayoutInflater inflater = getActivity().getLayoutInflater();
-    View view = inflater.inflate(R.layout.dialog_box, null);
+    View view = inflater.inflate(R.layout.loading_dialog, null);
 
     builder.setView(view)
             .setTitle("");

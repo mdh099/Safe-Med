@@ -74,6 +74,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private MultiBoxTracker tracker;
 
     private BorderedText borderedText;
+    private AlertDialog loadingDialog;
+    private AlertDialog syringeDialog;
+    private AlertDialog infoDialog;
+    private FloatingActionButton addSyringeButton;
+    private FloatingActionButton infoButton;
+
+    private String name = null, volume = null, units = null, numberOfLines = null;
 
     public void openDialog(){
         loadingDialog.show();
@@ -89,6 +96,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         super.onCreate(savedInstanceState);
         createSyringeDialog();
         createLoadingDialog();
+        createInfoDialog();
+
         addSyringeButton = findViewById(R.id.floatingActionButton);
         addSyringeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,11 +105,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 syringeDialog.show();
             }
         });
-    }
 
-    private String name = null, volume = null, units = null, numberOfLines = null;
-    private AlertDialog syringeDialog;
-    private FloatingActionButton addSyringeButton;
+        infoButton = findViewById(R.id.info_button);
+        infoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {infoDialog.show();}
+        });
+    }
 
     public void createSyringeDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -126,17 +137,22 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         syringeDialog = builder.create();
     }
 
-    private AlertDialog loadingDialog;
     public void createLoadingDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("");
-        View view = getLayoutInflater().inflate(R.layout.dialog_box, null);
+        View view = getLayoutInflater().inflate(R.layout.loading_dialog, null);
         builder.setView(view);
         loadingDialog = builder.create();
         loadingDialog.setCancelable(false);
     }
 
-
+    public void createInfoDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Info");
+        View view = getLayoutInflater().inflate(R.layout.info_dialog, null);
+        builder.setView(view);
+        loadingDialog = builder.create();
+    }
 
     @Override
     public void onPreviewSizeChosen(final Size size, final int rotation) {
