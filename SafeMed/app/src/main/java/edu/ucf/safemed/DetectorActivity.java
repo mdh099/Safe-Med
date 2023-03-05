@@ -143,7 +143,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         builder.setTitle("Info");
         View view = getLayoutInflater().inflate(R.layout.info_dialog, null);
         builder.setView(view);
-        loadingDialog = builder.create();
+        infoDialog = builder.create();
     }
 
     @Override
