@@ -14,36 +14,28 @@
  limitations under the License.
 -->
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#00000000">
+    android:background="#00000000"
+    android:rotationX="-360"
+    android:rotationY="-360">
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/add_syringe_button"
+        tools:context="org.tensorflow.demo.CameraActivity">
 
+    </FrameLayout>
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/tfe_color_primary"
         android:orientation="vertical">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/add_syringe_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/addSyringe"
-            android:layout_marginLeft="-301dp"
-            android:layout_marginTop="103dp"
-            android:layout_toRightOf="@id/addSyringe"
-            android:clickable="true"
-            android:src="@drawable/ic_baseline_add" />
-
-        <TableRow
-            android:id="@+id/Title"
-            android:layout_width="match_parent"
-            android:layout_height="56dp" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -56,34 +48,30 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/safemed_banner"
                 android:layout_gravity="center" />
+
         </androidx.appcompat.widget.Toolbar>
 
-        <FrameLayout
-            android:id="@+id/container"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_syringe_button"
             android:layout_width="match_parent"
-            android:layout_height="600dp"
-            android:layout_below="@id/Title"
-            tools:context="org.tensorflow.demo.CameraActivity"></FrameLayout>
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="248dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_baseline_add" />
 
-        <RelativeLayout
-            android:id="@+id/addSyringe"
-            android:layout_width="312dp"
-            android:layout_height="79dp"
-            android:layout_below="@id/container"
-            android:layout_marginTop="-4dp">
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/info_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="13dp"
-                android:layout_marginBottom="8dp"
-                android:clickable="true"
-                app:srcCompat="@android:drawable/ic_dialog_info" />
-        </RelativeLayout>
-
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/info_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="165dp"
+            android:clickable="true"
+            app:srcCompat="@android:drawable/ic_menu_help" />
     </RelativeLayout>
 
     <include

@@ -98,19 +98,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         createLoadingDialog();
         createInfoDialog();
 
-        addSyringeButton = findViewById(R.id.floatingActionButton);
-        addSyringeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v){
-                syringeDialog.show();
-            }
-        });
+        addSyringeButton = findViewById(R.id.add_syringe_button);
+        addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
 
         infoButton = findViewById(R.id.info_button);
-        infoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {infoDialog.show();}
-        });
+        infoButton.setOnClickListener((view) -> {infoDialog.show();});
     }
 
     public void createSyringeDialog(){
