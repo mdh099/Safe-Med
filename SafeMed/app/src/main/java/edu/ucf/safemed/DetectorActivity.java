@@ -112,6 +112,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -120,19 +121,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 createInfoDialog();
                 createResultsDialog();
 
-                addSyringeButton = findViewById(R.id.floatingActionButton);
-                addSyringeButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v){
-                        syringeDialog.show();
-                    }
-                });
+                addSyringeButton = findViewById(R.id.add_syringe_button);
+                addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
 
                 infoButton = findViewById(R.id.info_button);
-                infoButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {infoDialog.show();}
-                });
+                infoButton.setOnClickListener((view) -> {infoDialog.show();});
             }
         });
 
