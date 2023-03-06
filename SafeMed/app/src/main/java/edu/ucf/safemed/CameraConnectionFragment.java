@@ -121,7 +121,7 @@ public class CameraConnectionFragment extends Fragment {
     /** ID of the current {@link CameraDevice}. */
     private String cameraId;
     /** An {@link AutoFitTextureView} for camera preview. */
-    private AutoFitTextureView textureView;
+    private TextureView textureView;
     /** A {@link CameraCaptureSession } for camera preview. */
     private CameraCaptureSession captureSession;
     /** A reference to the opened {@link CameraDevice}. */
@@ -292,7 +292,7 @@ public class CameraConnectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
-        textureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+        textureView = view.findViewById(R.id.texture);
     }
 
     @Override
@@ -351,9 +351,9 @@ public class CameraConnectionFragment extends Fragment {
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             final int orientation = getResources().getConfiguration().orientation;
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
+                //textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
             } else {
-                textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
+               // textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
             }
         } catch (final CameraAccessException e) {
             LOGGER.info(String.format(e + "Exception!"));
@@ -420,14 +420,14 @@ public class CameraConnectionFragment extends Fragment {
     }
 
     /** Starts a background thread and its {@link Handler}. */
-    private void startBackgroundThread() {
+    public void startBackgroundThread() {
         backgroundThread = new HandlerThread("ImageListener");
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
     }
 
     /** Stops the background thread and its {@link Handler}. */
-    private void stopBackgroundThread() {
+    public void stopBackgroundThread() {
         backgroundThread.quitSafely();
         try {
             backgroundThread.join();

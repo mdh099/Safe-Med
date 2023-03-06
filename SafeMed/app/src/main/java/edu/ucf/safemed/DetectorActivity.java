@@ -96,13 +96,16 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     public void resultsDialog(double valueToDisplay){
-        runOnUiThread(() -> {
-            System.out.println("REACHED: " + value);
-            if (value != null) {
-                value.setText("" + valueToDisplay);
-                System.out.println("UPDATING: " + valueToDisplay);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("REACHED: " + value);
+                if (value != null) {
+                    value.setText("" + valueToDisplay);
+                    System.out.println("UPDATING: " + valueToDisplay);
+                }
+                resultsDialog.show();
             }
-            resultsDialog.show();
         });
     }
 
@@ -110,17 +113,20 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        runOnUiThread(() -> {
-            createSyringeDialog();
-            createLoadingDialog();
-            createInfoDialog();
-            createResultsDialog();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                createSyringeDialog();
+                createLoadingDialog();
+                createInfoDialog();
+                createResultsDialog();
 
-            addSyringeButton = findViewById(R.id.add_syringe_button);
-            addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
+                addSyringeButton = findViewById(R.id.add_syringe_button);
+                addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
 
-            infoButton = findViewById(R.id.info_button);
-            infoButton.setOnClickListener((view) -> {infoDialog.show();});
+                infoButton = findViewById(R.id.info_button);
+                infoButton.setOnClickListener((view) -> {infoDialog.show();});
+            }
         });
 
     }
@@ -131,7 +137,15 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         View view = getLayoutInflater().inflate(R.layout.results_dialog, null);
         value = view.findViewById(R.id.result);
         Button resultsSubmit = view.findViewById(R.id.results_submit);
-        resultsSubmit.setOnClickListener(v -> resultsDialog.dismiss());
+        resultsSubmit.setOnClickListener(v ->  {
+            if (camera2Fragment != null){
+                camera2Fragment.onResume();
+            }
+            else if (legacyFragment != null){
+                legacyFragment.onResume();
+            }
+            resultsDialog.dismiss();
+        });
         builder.setView(view);
         resultsDialog = builder.create();
     }
@@ -146,14 +160,16 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         eUnits = view.findViewById(R.id.units);
         eLines = view.findViewById(R.id.lines);
         Button submit = view.findViewById(R.id.submit);
-        submit.setOnClickListener((x) -> {
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
                 name = eName.getText().toString();
                 volume = eVolume.getText().toString();
                 units = eUnits.getText().toString();
                 numberOfLines = eLines.getText().toString();
                 syringeDialog.dismiss();
             }
-        );
+        });
         builder.setView(view);
         syringeDialog = builder.create();
     }
@@ -173,8 +189,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         View view = getLayoutInflater().inflate(R.layout.info_dialog, null);
         builder.setView(view);
         infoDialog = builder.create();
-        Button exit = view.findViewById(R.id.exit_button);
-        exit.setOnClickListener((x) -> infoDialog.dismiss());
     }
 
     @Override
@@ -412,7 +426,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
         if (boundingBox != null){
-            runOnUiThread(() -> openDialog());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    openDialog();
+                }
+            });
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
@@ -459,9 +478,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                             double eps = 1e-9;
                             double result = (plungerLines / (barrelLines + eps));
                             System.out.println("Total volume ratio is: " + result);
-                            runOnUiThread(() -> {
-                                dismissDialog();
-                                resultsDialog(result);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dismissDialog();
+                                    resultsDialog(result);
+                                }
                             });
                         }
                         computingDetection = false;

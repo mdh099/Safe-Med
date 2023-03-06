@@ -1,21 +1,5 @@
 package edu.ucf.safemed;
 
-/*
- * Copyright 2019 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
@@ -64,8 +48,7 @@ import edu.ucf.safemed.env.ImageUtils;
 
 public abstract class CameraActivity extends AppCompatActivity
         implements OnImageAvailableListener,
-        Camera.PreviewCallback,
-        View.OnClickListener {
+        Camera.PreviewCallback {
     private static final Logger LOGGER = Logger.getLogger(CameraActivity.class.getName());
 
     private static final int PERMISSIONS_REQUEST = 1;
@@ -83,30 +66,9 @@ public abstract class CameraActivity extends AppCompatActivity
     private byte[][] yuvBytes = new byte[3][];
     private int[] rgbBytes = null;
     private int yRowStride;
-    protected int defaultModelIndex = 0;
-    protected int defaultDeviceIndex = 0;
 
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
-    protected ArrayList<String> modelStrings = new ArrayList<String>();
-
-    private LinearLayout bottomSheetLayout;
-    private LinearLayout gestureLayout;
-    private BottomSheetBehavior<LinearLayout> sheetBehavior;
-
-    protected TextView frameValueTextView, cropValueTextView, inferenceTimeTextView;
-    protected ImageView bottomSheetArrowImageView;
-    private ImageView plusImageView, minusImageView;
-    protected ListView deviceView;
-    protected TextView threadsTextView;
-    protected ListView modelView;
-
-    /** Current indices of device and model. */
-    int currentDevice = -1;
-    int currentModel = -1;
-    int currentNumThreads = -1;
-
-    ArrayList<String> deviceStrings = new ArrayList<>(Arrays.asList("CPU", "GPU", "NNAPI"));
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -115,130 +77,12 @@ public abstract class CameraActivity extends AppCompatActivity
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.tfe_od_activity_camera);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         if (hasPermission()) {
             setFragment();
         } else {
             requestPermission();
         }
-
-        threadsTextView = findViewById(R.id.threads);
-        currentNumThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
-        plusImageView = findViewById(R.id.plus);
-        minusImageView = findViewById(R.id.minus);
-        deviceView = findViewById(R.id.device_list);
-
-        deviceView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        ArrayAdapter<String> deviceAdapter =
-                new ArrayAdapter<>(
-                        CameraActivity.this , R.layout.deviceview_row, R.id.deviceview_row_text, deviceStrings);
-        deviceView.setAdapter(deviceAdapter);
-        deviceView.setItemChecked(defaultDeviceIndex, true);
-        currentDevice = defaultDeviceIndex;
-        deviceView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        updateActiveModel();
-                    }
-                });
-
-        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
-        gestureLayout = findViewById(R.id.gesture_layout);
-        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
-        modelView = findViewById((R.id.model_list));
-
-        modelStrings = getModelStrings(getAssets(), ASSET_PATH);
-        modelView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        ArrayAdapter<String> modelAdapter =
-                new ArrayAdapter<>(
-                        CameraActivity.this , R.layout.listview_row, R.id.listview_row_text, modelStrings);
-        modelView.setAdapter(modelAdapter);
-        modelView.setItemChecked(defaultModelIndex, true);
-        currentModel = defaultModelIndex;
-        modelView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        updateActiveModel();
-                    }
-                });
-
-        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                            gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        } else {
-                            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        }
-                        //                int width = bottomSheetLayout.getMeasuredWidth();
-                        int height = gestureLayout.getMeasuredHeight();
-
-                        sheetBehavior.setPeekHeight(height);
-                    }
-                });
-        sheetBehavior.setHideable(false);
-
-        sheetBehavior.setBottomSheetCallback(
-                new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        switch (newState) {
-                            case BottomSheetBehavior.STATE_HIDDEN:
-                                break;
-                            case BottomSheetBehavior.STATE_EXPANDED:
-                            {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_COLLAPSED:
-                            {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_DRAGGING:
-                                break;
-                            case BottomSheetBehavior.STATE_SETTLING:
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                                break;
-                        }
-                    }
-
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-                });
-
-        frameValueTextView = findViewById(R.id.frame_info);
-        cropValueTextView = findViewById(R.id.crop_info);
-        inferenceTimeTextView = findViewById(R.id.inference_info);
-
-        plusImageView.setOnClickListener(this);
-        minusImageView.setOnClickListener(this);
-    }
-
-    protected ArrayList<String> getModelStrings(AssetManager mgr, String path){
-        ArrayList<String> res = new ArrayList<String>();
-        try {
-            String[] files = mgr.list(path);
-            for (String file : files) {
-                String[] splits = file.split("\\.");
-                if (splits[splits.length - 1].equals("tflite")) {
-                    res.add(file);
-                }
-            }
-
-        }
-        catch (IOException e){
-            System.err.println("getModelStrings: " + e.getMessage());
-        }
-        return res;
     }
 
     protected int[] getRgbBytes() {
@@ -294,6 +138,7 @@ public abstract class CameraActivity extends AppCompatActivity
                         isProcessingFrame = false;
                     }
                 };
+
         startPipeline();
     }
 
@@ -406,8 +251,7 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(
-            final int requestCode, final String[] permissions, final int[] grantResults) {
+    public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSIONS_REQUEST) {
             if (allPermissionsGranted(grantResults)) {
@@ -495,12 +339,15 @@ public abstract class CameraActivity extends AppCompatActivity
         return null;
     }
 
+    CameraConnectionFragment camera2Fragment = null;
+    LegacyCameraConnectionFragment legacyFragment = null;
+
     protected void setFragment() {
         String cameraId = chooseCamera();
 
         Fragment fragment;
         if (useCamera2API) {
-            CameraConnectionFragment camera2Fragment =
+            camera2Fragment =
                     CameraConnectionFragment.newInstance(
                             new CameraConnectionFragment.ConnectionCallback() {
                                 @Override
@@ -517,10 +364,10 @@ public abstract class CameraActivity extends AppCompatActivity
             camera2Fragment.setCamera(cameraId);
             fragment = camera2Fragment;
         } else {
-            fragment =
+            fragment = legacyFragment =
                     new LegacyCameraConnectionFragment(this, getLayoutId(), getDesiredPreviewFrameSize());
         }
-
+        System.out.println(camera2Fragment + " asdf " + legacyFragment);
         getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
     }
 
@@ -560,38 +407,6 @@ public abstract class CameraActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        String threads = threadsTextView.getText().toString().trim();
-        int numThreads = Integer.parseInt(threads);
-
-        if (v.getId() == R.id.plus) {
-            if (numThreads >= 9) return;
-            numThreads++;
-        } 
-
-        if (v.getId() == R.id.minus) {
-            if (numThreads == 1) return;
-            numThreads--;
-        }
-
-        threadsTextView.setText(String.valueOf(numThreads));
-        setNumThreads(numThreads);
-    }
-
-    protected void showFrameInfo(String frameInfo) {
-        frameValueTextView.setText(frameInfo);
-    }
-
-    protected void showCropInfo(String cropInfo) {
-        cropValueTextView.setText(cropInfo);
-    }
-
-    protected void showInference(String inferenceTime) {
-        inferenceTimeTextView.setText(inferenceTime);
-    }
-
-    protected abstract void updateActiveModel();
     protected abstract void startPipeline();
 
     protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
@@ -599,6 +414,4 @@ public abstract class CameraActivity extends AppCompatActivity
     protected abstract int getLayoutId();
 
     protected abstract Size getDesiredPreviewFrameSize();
-
-    protected abstract void setNumThreads(int numThreads);
 }
