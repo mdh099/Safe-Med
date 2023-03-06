@@ -115,16 +115,14 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         eUnits = view.findViewById(R.id.units);
         eLines = view.findViewById(R.id.lines);
         Button submit = view.findViewById(R.id.submit);
-        submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v){
+        submit.setOnClickListener((x) -> {
                 name = eName.getText().toString();
                 volume = eVolume.getText().toString();
                 units = eUnits.getText().toString();
                 numberOfLines = eUnits.getText().toString();
                 syringeDialog.dismiss();
             }
-        });
+        );
         builder.setView(view);
         syringeDialog = builder.create();
     }
@@ -144,6 +142,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         View view = getLayoutInflater().inflate(R.layout.info_dialog, null);
         builder.setView(view);
         infoDialog = builder.create();
+        Button exit = view.findViewById(R.id.exit_button);
+        exit.setOnClickListener((x) -> infoDialog.dismiss());
     }
 
     @Override

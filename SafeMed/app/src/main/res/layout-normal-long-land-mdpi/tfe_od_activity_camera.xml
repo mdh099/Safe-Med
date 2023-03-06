@@ -22,14 +22,7 @@
     android:background="#00000000"
     android:rotationX="-360"
     android:rotationY="-360">
-    <FrameLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/add_syringe_button"
-        tools:context="org.tensorflow.demo.CameraActivity">
 
-    </FrameLayout>
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
@@ -37,6 +30,13 @@
         android:background="@color/tfe_color_primary"
         android:orientation="vertical">
 
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/add_syringe_button"
+            tools:context="org.tensorflow.demo.CameraActivity">
+        </FrameLayout>
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -52,26 +52,39 @@
         </androidx.appcompat.widget.Toolbar>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/add_syringe_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="248dp"
-            android:clickable="true"
-            app:srcCompat="@drawable/ic_baseline_add" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/info_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="165dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="155dp"
             android:clickable="true"
             app:srcCompat="@android:drawable/ic_menu_help" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_syringe_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="235dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_baseline_add" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/start_inference_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="315dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/safemed_logo"
+            android:scaleType="center"
+            app:maxImageSize="45dp" />
     </RelativeLayout>
 
     <include
