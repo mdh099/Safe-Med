@@ -19,6 +19,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -77,8 +78,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private AlertDialog loadingDialog;
     private AlertDialog syringeDialog;
     private AlertDialog infoDialog;
+    private AlertDialog resultsDialog;
+
     private FloatingActionButton addSyringeButton;
     private FloatingActionButton infoButton;
+
+    private TextView value;
 
     private String name = null, volume = null, units = null, numberOfLines = null;
 
@@ -90,27 +95,63 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         loadingDialog.dismiss();
     }
 
+    public void resultsDialog(double valueToDisplay){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("REACHED: " + value);
+                if (value != null) {
+                    value.setText("" + valueToDisplay);
+                    System.out.println("UPDATING: " + valueToDisplay);
+                }
+                resultsDialog.show();
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createSyringeDialog();
-        createLoadingDialog();
-        createInfoDialog();
-
-        addSyringeButton = findViewById(R.id.floatingActionButton);
-        addSyringeButton.setOnClickListener(new View.OnClickListener() {
+        runOnUiThread(new Runnable() {
             @Override
-            public void onClick(View v){
-                syringeDialog.show();
+            public void run() {
+                createSyringeDialog();
+                createLoadingDialog();
+                createInfoDialog();
+                createResultsDialog();
+
+                addSyringeButton = findViewById(R.id.floatingActionButton);
+                addSyringeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v){
+                        syringeDialog.show();
+                    }
+                });
+
+                infoButton = findViewById(R.id.info_button);
+                infoButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {infoDialog.show();}
+                });
             }
         });
 
-        infoButton = findViewById(R.id.info_button);
-        infoButton.setOnClickListener(new View.OnClickListener() {
+    }
+
+    public void createResultsDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Result");
+        View view = getLayoutInflater().inflate(R.layout.results_dialog, null);
+        value = view.findViewById(R.id.result);
+        Button resultsSubmit = view.findViewById(R.id.results_submit);
+        resultsSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {infoDialog.show();}
+            public void onClick(View v) {
+                resultsDialog.dismiss();
+            }
         });
+        builder.setView(view);
+        resultsDialog = builder.create();
     }
 
     public void createSyringeDialog(){
@@ -129,7 +170,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 name = eName.getText().toString();
                 volume = eVolume.getText().toString();
                 units = eUnits.getText().toString();
-                numberOfLines = eUnits.getText().toString();
+                numberOfLines = eLines.getText().toString();
                 syringeDialog.dismiss();
             }
         });
@@ -151,7 +192,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         builder.setTitle("Info");
         View view = getLayoutInflater().inflate(R.layout.info_dialog, null);
         builder.setView(view);
-        loadingDialog = builder.create();
+        infoDialog = builder.create();
     }
 
     @Override
@@ -375,7 +416,20 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
         if (boundingBox != null){
-//            openDialog();
+            Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
+            List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
+            System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
+            drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
+            cnt = results.size();
+        }
+        return cnt;
+    }
+
+    public int runDetectionAndCountLinesBarrel(YoloV5Classifier detector, Bitmap cropCopyBitmap, String type, long currTimestamp){
+        int cnt = -1;
+        final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
+        Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
+        if (boundingBox != null){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -422,20 +476,21 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     @Override
                     public void run() {
                         cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
-                        double barrelLines = runDetectionAndCountLines(detector, cropCopyBitmap, "barrel", currTimestamp);
-                        double plungerLines = runDetectionAndCountLines(detectorPlunger, cropCopyBitmap, "plunger", currTimestamp);
-                        double eps = 1e-9;
-                        System.out.println("Total volume ratio is: " + (plungerLines / (barrelLines + eps)));
+                        int barrelLines = runDetectionAndCountLinesBarrel(detector, cropCopyBitmap, "barrel", currTimestamp);
+                        if (barrelLines != -1) {
+                            int plungerLines = runDetectionAndCountLines(detectorPlunger, cropCopyBitmap, "plunger", currTimestamp);
+                            double eps = 1e-9;
+                            double result = (plungerLines / (barrelLines + eps));
+                            System.out.println("Total volume ratio is: " + result);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dismissDialog();
+                                    resultsDialog(result);
+                                }
+                            });
+                        }
                         computingDetection = false;
-                        runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showFrameInfo(previewWidth + "x" + previewHeight);
-                                        showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
-                                        showInference(lastProcessingTimeMs + "ms");
-                                    }
-                                });
                     }
                 });
     }
