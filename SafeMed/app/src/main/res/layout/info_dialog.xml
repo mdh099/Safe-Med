@@ -9,41 +9,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="10dp">
-
-        <EditText
-            android:id="@+id/name"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Name"/>
-
-        <EditText
-            android:id="@+id/volume"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="Volume"
-            android:inputType="number"/>
-
-        <EditText
-            android:id="@+id/units"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="Units"/>
-
-        <EditText
-            android:id="@+id/lines"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="Number of Lines"
-            android:inputType="number"/>
-
+            android:text="@string/info_dialog_text"/>
         <Button
-            android:id="@+id/submit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Submit"
-            android:layout_marginTop="10dp"
-            android:layout_gravity="end"/>
-
+            android:id="@+id/exit_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Exit" />
     </LinearLayout>
 
 </RelativeLayout>

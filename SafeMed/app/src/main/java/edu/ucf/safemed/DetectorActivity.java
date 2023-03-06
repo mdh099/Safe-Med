@@ -96,16 +96,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     public void resultsDialog(double valueToDisplay){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("REACHED: " + value);
-                if (value != null) {
-                    value.setText("" + valueToDisplay);
-                    System.out.println("UPDATING: " + valueToDisplay);
-                }
-                resultsDialog.show();
+        runOnUiThread(() -> {
+            System.out.println("REACHED: " + value);
+            if (value != null) {
+                value.setText("" + valueToDisplay);
+                System.out.println("UPDATING: " + valueToDisplay);
             }
+            resultsDialog.show();
         });
     }
 
@@ -113,20 +110,17 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                createSyringeDialog();
-                createLoadingDialog();
-                createInfoDialog();
-                createResultsDialog();
+        runOnUiThread(() -> {
+            createSyringeDialog();
+            createLoadingDialog();
+            createInfoDialog();
+            createResultsDialog();
 
-                addSyringeButton = findViewById(R.id.add_syringe_button);
-                addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
+            addSyringeButton = findViewById(R.id.add_syringe_button);
+            addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
 
-                infoButton = findViewById(R.id.info_button);
-                infoButton.setOnClickListener((view) -> {infoDialog.show();});
-            }
+            infoButton = findViewById(R.id.info_button);
+            infoButton.setOnClickListener((view) -> {infoDialog.show();});
         });
 
     }
@@ -137,12 +131,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         View view = getLayoutInflater().inflate(R.layout.results_dialog, null);
         value = view.findViewById(R.id.result);
         Button resultsSubmit = view.findViewById(R.id.results_submit);
-        resultsSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resultsDialog.dismiss();
-            }
-        });
+        resultsSubmit.setOnClickListener(v -> resultsDialog.dismiss());
         builder.setView(view);
         resultsDialog = builder.create();
     }
@@ -423,12 +412,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
         if (boundingBox != null){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    openDialog();
-                }
-            });
+            runOnUiThread(() -> openDialog());
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
@@ -475,12 +459,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                             double eps = 1e-9;
                             double result = (plungerLines / (barrelLines + eps));
                             System.out.println("Total volume ratio is: " + result);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    dismissDialog();
-                                    resultsDialog(result);
-                                }
+                            runOnUiThread(() -> {
+                                dismissDialog();
+                                resultsDialog(result);
                             });
                         }
                         computingDetection = false;
