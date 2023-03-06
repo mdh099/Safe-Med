@@ -201,11 +201,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         tracker = new MultiBoxTracker(this);
 
-        final int modelIndex = modelView.getCheckedItemPosition();
-        final String modelString = modelStrings.get(modelIndex);
-
         try {
-            detector = DetectorFactory.getDetector(getAssets(), modelString);
+            detector = DetectorFactory.getDetector(getAssets(), Constants.BARREL_DETECT_MODEL);
             detectorLines = DetectorFactory.getDetector(getAssets(), Constants.LINE_DETECT_MODEL);
             detectorPlunger = DetectorFactory.getDetector(getAssets(), Constants.PLUNGER_DETECT_MODEL);
         } catch (final IOException e) {
@@ -254,77 +251,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
     }
 
-    protected void updateActiveModel() {
-        // Get UI information before delegating to background
-        final int modelIndex = modelView.getCheckedItemPosition();
-        final int deviceIndex = deviceView.getCheckedItemPosition();
-        String threads = threadsTextView.getText().toString().trim();
-        final int numThreads = Integer.parseInt(threads);
-
-        handler.post(() -> {
-            if (modelIndex == currentModel && deviceIndex == currentDevice
-                    && numThreads == currentNumThreads) {
-                return;
-            }
-            currentModel = modelIndex;
-            currentDevice = deviceIndex;
-            currentNumThreads = numThreads;
-
-            // Disable classifier while updating
-            if (detector != null) {
-                detector.close();
-                detector = null;
-            }
-
-            // Lookup names of parameters.
-            String modelString = modelStrings.get(modelIndex);
-            String device = deviceStrings.get(deviceIndex);
-
-            LOGGER.info("Changing model to " + modelString + " device " + device);
-
-            // Try to load model.
-
-            try {
-                detector = DetectorFactory.getDetector(getAssets(), modelString);
-                // Customize the interpreter to the type of device we want to use.
-                if (detector == null) {
-                    return;
-                }
-            }
-            catch(IOException e) {
-                e.printStackTrace();
-                LOGGER.info(e + "Exception in updateActiveModel()");
-                Toast toast =
-                        Toast.makeText(
-                                getApplicationContext(), "Classifier could not be initialized", Toast.LENGTH_SHORT);
-                toast.show();
-                finish();
-            }
-
-
-            if (device.equals("CPU")) {
-                detector.useCPU();
-            } else if (device.equals("GPU")) {
-                detector.useGpu();
-            } else if (device.equals("NNAPI")) {
-                detector.useNNAPI();
-            }
-            detector.setNumThreads(numThreads);
-
-            int cropSize = detector.getInputSize();
-            croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Config.ARGB_8888);
-
-            frameToCropTransform =
-                    ImageUtils.getTransformationMatrix(
-                            previewWidth, previewHeight,
-                            cropSize, cropSize,
-                            sensorOrientation, MAINTAIN_ASPECT);
-
-            cropToFrameTransform = new Matrix();
-            frameToCropTransform.invert(cropToFrameTransform);
-        });
-    }
-
     @Override
     protected int getLayoutId() {
         return R.layout.tfe_od_camera_connection_fragment_tracking;
@@ -333,11 +259,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     @Override
     protected Size getDesiredPreviewFrameSize() {
         return DESIRED_PREVIEW_SIZE;
-    }
-
-    @Override
-    protected void setNumThreads(final int numThreads) {
-        runInBackground(() -> detector.setNumThreads(numThreads));
     }
 
     private String saveToInternalStorage(Bitmap bitmapImage, String filename){
