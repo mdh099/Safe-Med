@@ -167,13 +167,13 @@ public class LegacyCameraConnectionFragment extends Fragment {
     }
 
     /** Starts a background thread and its {@link Handler}. */
-    private void startBackgroundThread() {
+    public void startBackgroundThread() {
         backgroundThread = new HandlerThread("CameraBackground");
         backgroundThread.start();
     }
 
     /** Stops the background thread and its {@link Handler}. */
-    private void stopBackgroundThread() {
+    public void stopBackgroundThread() {
         backgroundThread.quitSafely();
         try {
             backgroundThread.join();
