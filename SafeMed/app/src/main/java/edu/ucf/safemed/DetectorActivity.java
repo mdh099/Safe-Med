@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -85,6 +86,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private TextView value;
 
+    private List<Syringe> syringeList = new ArrayList<>();
     private String name = null, volume = null, units = null, numberOfLines = null;
 
     public void openDialog(){
@@ -167,6 +169,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 volume = eVolume.getText().toString();
                 units = eUnits.getText().toString();
                 numberOfLines = eLines.getText().toString();
+
+                Syringe newSyringe = new Syringe(name, numberOfLines, volume, units);
+                syringeList.add(newSyringe);
+
+                newSyringe.writeToFile(syringeList, getApplicationContext());
                 syringeDialog.dismiss();
             }
         });
@@ -266,11 +273,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         // Create imageDir
-        File mypath=new File(directory,filename);
+        File myPath=new File(directory,filename);
 
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(mypath);
+            fos = new FileOutputStream(myPath);
             // Use the compress method on the BitMap object to write image to the OutputStream
             bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
         } catch (Exception e) {

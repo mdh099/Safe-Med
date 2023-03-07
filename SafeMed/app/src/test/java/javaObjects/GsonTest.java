@@ -11,7 +11,7 @@ import org.junit.Test;
 public class GsonTest {
     @Test
     public void objectToJson() {
-        Syringe syringe = new Syringe(20, 10);
+        Syringe syringe = new Syringe("test", 20, 10, "tests");
         Gson gson = new Gson();
 
         String json = gson.toJson(syringe);

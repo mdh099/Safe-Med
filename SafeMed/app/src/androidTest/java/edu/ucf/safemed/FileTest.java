@@ -23,9 +23,9 @@ public class FileTest {
 
     @Test
     public void writeToFile() {
-        Syringe syringe1 = new Syringe(20, 10);
-        Syringe syringe2 = new Syringe(10, 5);
-        Syringe syringe3 = new Syringe(100, 1000);
+        Syringe syringe1 = new Syringe("a", 20, 10, "mL");
+        Syringe syringe2 = new Syringe("b", 10, 5, "cc");
+        Syringe syringe3 = new Syringe("c", 100, 1000, "UNITS");
         ArrayList<Object> syringes = new ArrayList<>();
         syringes.add(syringe1);
         syringes.add(syringe2);
@@ -42,9 +42,9 @@ public class FileTest {
             outputStreamWriter.close();
         }
         catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e);
-        }
+        Log.e("Exception", "File write failed: " + e);
     }
+}
 
     @Test
     public void readFromFile() {

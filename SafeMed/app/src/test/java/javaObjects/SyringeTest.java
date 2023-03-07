@@ -7,8 +7,6 @@ import static org.junit.Assert.*;
 public class SyringeTest {
     @Test
     public void syringeCreation() {
-        Syringe syringe = new Syringe(20, 10);
-
-        assertEquals(syringe.name, "10ml (20 lines)");
+        Syringe syringe = new Syringe("name", 20, 10, "unit");
     }
 }
