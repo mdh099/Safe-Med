@@ -29,17 +29,6 @@
         android:background="@color/tfe_color_primary"
         android:orientation="vertical">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/add_syringe_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/addSyringe"
-            android:layout_marginLeft="-301dp"
-            android:layout_marginTop="103dp"
-            android:layout_toRightOf="@id/addSyringe"
-            android:clickable="true"
-            android:src="@drawable/ic_baseline_add" />
-
         <TableRow
             android:id="@+id/Title"
             android:layout_width="match_parent"
@@ -67,10 +56,11 @@
 
         <RelativeLayout
             android:id="@+id/addSyringe"
-            android:layout_width="312dp"
+            android:layout_width="match_parent"
             android:layout_height="79dp"
             android:layout_below="@id/container"
-            android:layout_marginTop="-4dp">
+            android:layout_marginTop="-4dp"
+            android:layout_marginBottom="4dp">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/info_button"
@@ -82,6 +72,35 @@
                 android:layout_marginBottom="8dp"
                 android:clickable="true"
                 app:srcCompat="@android:drawable/ic_dialog_info" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/add_syringe_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="340dp"
+                android:layout_marginTop="13dp"
+                android:clickable="true"
+                android:src="@drawable/ic_baseline_add" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/add"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_below="@id/addSyringe"
+            android:layout_marginTop="-8dp">
+
+
+
+            <ListView
+                android:id="@+id/list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_anchorGravity="center" />
+
+
         </RelativeLayout>
 
     </RelativeLayout>

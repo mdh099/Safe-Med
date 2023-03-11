@@ -17,8 +17,10 @@ import android.os.Bundle;
 import android.util.Size;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -85,6 +88,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private TextView value;
 
+    private ListView listView;
+
     private String name = null, volume = null, units = null, numberOfLines = null;
 
     public void openDialog(){
@@ -122,6 +127,24 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 createResultsDialog();
 
                 addSyringeButton = findViewById(R.id.add_syringe_button);
+
+                listView = findViewById(R.id.list_view);
+                List<String> list = new ArrayList<>();
+                list.add("Syring1");
+                list.add("Syring2");
+                list.add("Syringe3");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                list.add("Syringe4");
+                ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(),  R.layout.layout, R.id.itemTextView ,list);
+                listView.setAdapter(arrayAdapter);
+
+
                 addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
 
                 infoButton = findViewById(R.id.info_button);
