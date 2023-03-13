@@ -83,6 +83,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private FloatingActionButton addSyringeButton;
     private FloatingActionButton infoButton;
+    private FloatingActionButton startInferenceButton;
 
     private TextView value;
 
@@ -121,6 +122,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 addSyringeButton = findViewById(R.id.add_syringe_button);
                 addSyringeButton.setOnClickListener((view) -> {syringeDialog.show();});
 
+                startInferenceButton = findViewById(R.id.start_inference_button);
+                startInferenceButton.setOnClickListener((view) -> { startInferenceButtonClicked = true;});
+
                 infoButton = findViewById(R.id.info_button);
                 infoButton.setOnClickListener((view) -> {infoDialog.show();});
             }
@@ -134,6 +138,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         View view = getLayoutInflater().inflate(R.layout.results_dialog, null);
         value = view.findViewById(R.id.result);
         Button resultsSubmit = view.findViewById(R.id.results_submit);
+
         resultsSubmit.setOnClickListener(v ->  {
             if (camera2Fragment != null){
                 camera2Fragment.onResume();
@@ -143,6 +148,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             }
             resultsDialog.dismiss();
         });
+
         builder.setView(view);
         resultsDialog = builder.create();
     }
@@ -164,6 +170,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 volume = eVolume.getText().toString();
                 units = eUnits.getText().toString();
                 numberOfLines = eLines.getText().toString();
+
+                if (volume == "" || numberOfLines == "") return;
 
                 Syringe newSyringe = new Syringe(name, numberOfLines, volume, units);
                 syringeList.add(newSyringe);
@@ -189,6 +197,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Info");
         View view = getLayoutInflater().inflate(R.layout.info_dialog, null);
+
+        Button exit = view.findViewById(R.id.exit_button);
+        exit.setOnClickListener((x) -> infoDialog.dismiss());
+
         builder.setView(view);
         infoDialog = builder.create();
     }
@@ -413,6 +425,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                         }
 
                         computingDetection = false;
+                        startInferenceButtonClicked = false;
                     });
     }
 }
