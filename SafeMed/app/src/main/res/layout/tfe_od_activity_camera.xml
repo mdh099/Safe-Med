@@ -88,5 +88,4 @@
             app:srcCompat="@android:drawable/ic_dialog_info" />
 
     </RelativeLayout>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

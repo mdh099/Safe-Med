@@ -98,26 +98,21 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     public void resultsDialog(double valueToDisplay){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("REACHED: " + value);
+        runOnUiThread(() -> {
+                LOGGER.info("REACHED: " + value);
                 if (value != null) {
                     value.setText("" + valueToDisplay);
-                    System.out.println("UPDATING: " + valueToDisplay);
+                    LOGGER.info("UPDATING: " + valueToDisplay);
                 }
                 resultsDialog.show();
-            }
-        });
+            });
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        runOnUiThread(() -> {
                 createSyringeDialog();
                 createLoadingDialog();
                 createInfoDialog();
@@ -129,7 +124,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 infoButton = findViewById(R.id.info_button);
                 infoButton.setOnClickListener((view) -> {infoDialog.show();});
             }
-        });
+        );
 
     }
 
@@ -276,6 +271,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         File myPath=new File(directory,filename);
 
         FileOutputStream fos = null;
+
         try {
             fos = new FileOutputStream(myPath);
             // Use the compress method on the BitMap object to write image to the OutputStream
@@ -289,20 +285,23 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 e.printStackTrace();
             }
         }
+
         return directory.getAbsolutePath();
     }
 
     public Bitmap cropToBoundingBox(Bitmap cropCopyBitmap, Classifier.Recognition temp, String filenameActual, String filenameCrop){
         Bitmap croppedBarrelDetect = null;
+
         if (temp != null) {
             int left = (int) temp.getLocation().left;
             int top = (int) temp.getLocation().bottom;
             int right = (int) temp.getLocation().right;
             int bottom = (int) temp.getLocation().top;
             croppedBarrelDetect = Bitmap.createBitmap(cropCopyBitmap, left, bottom, right - left, top - bottom);
-            System.out.println("Saving cropped detection: " + saveToInternalStorage(croppedBarrelDetect, filenameCrop));
-            System.out.println("Saving actual detection: " + saveToInternalStorage(cropCopyBitmap, filenameActual));
+            LOGGER.info("Saving cropped detection: " + saveToInternalStorage(croppedBarrelDetect, filenameCrop));
+            LOGGER.info("Saving actual detection: " + saveToInternalStorage(cropCopyBitmap, filenameActual));
         }
+
         return croppedBarrelDetect;
     }
 
@@ -319,6 +318,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         for (final Classifier.Recognition result : results) {
             final RectF location = result.getLocation();
+
             if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
                 canvas.drawRect(location, paint);
 
@@ -331,7 +331,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         tracker.trackResults(mappedRecognitions, currTimestamp);
         if (filename != null)
-            System.out.println("Saving line count detection: " + saveToInternalStorage(cropCopyBitmap, filename));
+            LOGGER.info("Saving line count detection: " + saveToInternalStorage(cropCopyBitmap, filename));
         trackingOverlay.postInvalidate();
     }
 
@@ -339,13 +339,15 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         int cnt = 0;
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
+
         if (boundingBox != null){
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
-            System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
+            LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
             cnt = results.size();
         }
+
         return cnt;
     }
 
@@ -353,25 +355,21 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         int cnt = -1;
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
+
         if (boundingBox != null){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    openDialog();
-                }
-            });
+            runOnUiThread(() -> { openDialog(); });
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
-            System.out.println("Results from counting lines on " + type +  ": " + countLines.size());
+            LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
             cnt = results.size();
         }
+
         return cnt;
     }
 
     @Override
     protected void startPipeline() {
-//        openDialog();
         ++timestamp;
         final long currTimestamp = timestamp;
         trackingOverlay.postInvalidate();
@@ -396,27 +394,26 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         }
 
         runInBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
+                    () -> {
                         cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
                         int barrelLines = runDetectionAndCountLinesBarrel(detector, cropCopyBitmap, "barrel", currTimestamp);
+
                         if (barrelLines != -1) {
+
                             int plungerLines = runDetectionAndCountLines(detectorPlunger, cropCopyBitmap, "plunger", currTimestamp);
                             double eps = 1e-9;
                             double result = (plungerLines / (barrelLines + eps));
-                            System.out.println("Total volume ratio is: " + result);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
+                            LOGGER.info("Total volume ratio is: " + result);
+
+                            runOnUiThread(() -> {
                                     dismissDialog();
                                     resultsDialog(result);
                                 }
-                            });
+                            );
                         }
+
                         computingDetection = false;
-                    }
-                });
+                    });
     }
 }
 
