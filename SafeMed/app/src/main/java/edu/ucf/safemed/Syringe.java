@@ -68,7 +68,6 @@ public class Syringe {
     public void setNumLines(double numLines) {
         this.numLines = numLines;
     }
-
     public List<Syringe> readFromFile(Context context){
         Gson gson = new Gson();
         String ret = "";

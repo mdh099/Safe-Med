@@ -35,7 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/addSyringe"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="-110dp"
             android:layout_toRightOf="@id/addSyringe"
             android:clickable="true"
             android:src="@drawable/ic_baseline_add" />
@@ -72,9 +71,17 @@
             android:layout_width="320dp"
             android:layout_height="122dp"
             android:layout_below="@id/container"
-            android:layout_marginTop="114dp">
+            android:layout_marginTop="11dp">
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"/>
 
         </RelativeLayout>
+
+
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/info_button"
@@ -82,9 +89,9 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/addSyringe"
             android:layout_marginLeft="23dp"
-            android:layout_marginTop="-44dp"
             android:layout_toRightOf="@id/addSyringe"
             android:clickable="true"
+            android:translationY="70dp"
             app:srcCompat="@android:drawable/ic_dialog_info" />
 
     </RelativeLayout>

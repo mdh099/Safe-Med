@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -38,8 +39,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,9 +76,12 @@ public abstract class CameraActivity extends AppCompatActivity
     private byte[][] yuvBytes = new byte[3][];
     private int[] rgbBytes = null;
     private int yRowStride;
-
+    private Syringe syringeInUse;
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
+
+    private ListView l;
+    private Syringe syringe;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -76,7 +89,41 @@ public abstract class CameraActivity extends AppCompatActivity
         super.onCreate(null);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
+
         setContentView(R.layout.tfe_od_activity_camera);
+
+        ArrayList<Syringe> syringeList = readFromFile();
+        String [] syringes = new String[syringeList.size()];
+        if (syringes.length == 0) {
+            syringe = null;
+        }
+        else {
+            syringe = syringeList.get(0);
+        }
+        for (int i = 0; i < syringeList.size(); i++) {
+            System.out.println(syringeList.get(i));
+            String syringeStr = syringeList.get(i).getName();
+            System.out.println(syringeStr);
+            syringes[i] = syringeStr;
+        }
+        l = (ListView) findViewById(R.id.list);
+        l.setClickable(true);
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
+                R.layout.layout, R.id.itemTextView, syringes);
+        l.setAdapter(arrayAdapter);
+//        }
+        l.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("Enter");
+                ArrayList<Syringe> syringeList = readFromFile();
+                syringe = syringeList.get(position);
+                System.out.println(syringe.getName() + " " + syringe.getNumLines());
+
+            }
+        });
 
         if (hasPermission()) {
             setFragment();
@@ -301,6 +348,40 @@ public abstract class CameraActivity extends AppCompatActivity
         }
         // deviceLevel is not LEGACY, can use numerical sort
         return requiredLevel <= deviceLevel;
+    }
+
+    public ArrayList<Syringe> readFromFile() {
+
+        Gson gson = new Gson();
+        String ret = "";
+
+        try {
+            Context context = getApplicationContext();
+            InputStream inputStream = context.openFileInput("syringes.json");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e);
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e);
+        }
+        Type syringeListType = new TypeToken<ArrayList<Syringe>>(){}.getType();
+        ArrayList<Syringe> readSyringes = gson.fromJson(ret, syringeListType);
+        return readSyringes;
+        // Breakpoint here to check read in list
     }
 
     private String chooseCamera() {
