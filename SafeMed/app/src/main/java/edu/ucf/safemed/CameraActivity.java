@@ -73,6 +73,7 @@ public abstract class CameraActivity extends AppCompatActivity
     private HandlerThread handlerThread;
     private boolean useCamera2API;
     private boolean isProcessingFrame = false;
+    protected boolean startInferenceButtonClicked = false;
     private byte[][] yuvBytes = new byte[3][];
     private int[] rgbBytes = null;
     private int yRowStride;
@@ -181,7 +182,7 @@ public abstract class CameraActivity extends AppCompatActivity
                 new Runnable() {
                     @Override
                     public void run() {
-                                camera.addCallbackBuffer(bytes);
+                        camera.addCallbackBuffer(bytes);
                         isProcessingFrame = false;
                     }
                 };
@@ -192,6 +193,8 @@ public abstract class CameraActivity extends AppCompatActivity
     /** Callback for Camera2 API */
     @Override
     public void onImageAvailable(final ImageReader reader) {
+        if (!startInferenceButtonClicked || isProcessingFrame) return;
+
         // We need wait until we have some size from onPreviewSizeChosen
         if (previewWidth == 0 || previewHeight == 0) {
             return;
@@ -206,10 +209,6 @@ public abstract class CameraActivity extends AppCompatActivity
                 return;
             }
 
-            if (isProcessingFrame) {
-                image.close();
-                return;
-            }
             isProcessingFrame = true;
             Trace.beginSection("imageAvailable");
             final Plane[] planes = image.getPlanes();
