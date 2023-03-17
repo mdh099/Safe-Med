@@ -394,7 +394,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         trackingOverlay.postInvalidate();
 
         // No mutex needed as this method is not reentrant.
-        if (computingDetection || !startInferenceButtonClicked) {
+        if (computingDetection) {
             readyForNextImage();
             return;
         }
