@@ -91,6 +91,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private String name = null, volume = null, units = null, numberOfLines = null;
 
     public void openDialog(){
+        if (camera2Fragment != null){
+            camera2Fragment.onPause();
+        }
+        else if (legacyFragment != null){
+            legacyFragment.onPause();
+        }
+
         loadingDialog.show();
     }
 
@@ -387,7 +394,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         trackingOverlay.postInvalidate();
 
         // No mutex needed as this method is not reentrant.
-        if (computingDetection) {
+        if (computingDetection || !startInferenceButtonClicked) {
             readyForNextImage();
             return;
         }

@@ -146,7 +146,6 @@ public abstract class CameraActivity extends AppCompatActivity
     /** Callback for Camera2 API */
     @Override
     public void onImageAvailable(final ImageReader reader) {
-        if (!startInferenceButtonClicked || isProcessingFrame) return;
 
         // We need wait until we have some size from onPreviewSizeChosen
         if (previewWidth == 0 || previewHeight == 0) {
