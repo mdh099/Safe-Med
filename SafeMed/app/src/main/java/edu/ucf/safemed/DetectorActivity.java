@@ -521,12 +521,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                             int plungerLines = runDetectionAndCountLines(detectorPlunger, cropCopyBitmap, "plunger", currTimestamp);
                             double eps = 1e-9;
-                            double result = (plungerLines / (barrelLines + eps));
+                            double result = (plungerLines / (syringe.getNumLines() + eps));
                             LOGGER.info("Total volume ratio is: " + result);
 
                             runOnUiThread(() -> {
                                     dismissDialog();
-                                    resultsDialog(result);
+                                    resultsDialog(result * syringe.getVolume());
                                 }
                             );
                         }
