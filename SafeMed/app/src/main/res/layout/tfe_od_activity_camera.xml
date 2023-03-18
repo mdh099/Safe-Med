@@ -42,6 +42,13 @@
             app:layout_constraintVertical_bias="1.0"
             tools:context="org.tensorflow.demo.CameraActivity"></FrameLayout>
 
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="400dp"
+            android:layout_height="200dp"
+            android:clickable="true"
+            android:translationY="300dp" />
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="0dp"
@@ -101,7 +108,13 @@
             app:layout_constraintTop_toBottomOf="@+id/add_syringe_button"
             app:layout_constraintHorizontal_bias="0.5"/>
 
+
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
 
     <include
         android:id="@+id/bottom_sheet_layout"

@@ -14,20 +14,32 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,6 +102,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private List<Syringe> syringeList = new ArrayList<>();
     private String name = null, volume = null, units = null, numberOfLines = null;
 
+    private ListView l;
+    private Syringe syringe;
+
     public void openDialog(){
         if (camera2Fragment != null){
             camera2Fragment.onPause();
@@ -120,6 +135,25 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        List<Syringe> temp = new ArrayList<Syringe>();
+        temp.add(new Syringe("Syringe 1", 18, 20, "ml"));
+        writeToFile(temp, getApplicationContext());
+
+        ArrayList<Syringe> syringeList = readFromFile();
+        String [] syringes = new String[syringeList.size()];
+        if (syringes.length == 0) {
+            syringe = null;
+        }
+        else {
+            syringe = syringeList.get(0);
+        }
+        for (int i = 0; i < syringeList.size(); i++) {
+            System.out.println(syringeList.get(i));
+            String syringeStr = syringeList.get(i).getName();
+            System.out.println(syringeStr);
+            syringes[i] = syringeStr;
+        }
+
         runOnUiThread(() -> {
                 createSyringeDialog();
                 createLoadingDialog();
@@ -134,9 +168,75 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                 infoButton = findViewById(R.id.info_button);
                 infoButton.setOnClickListener((view) -> {infoDialog.show();});
+
+                l = (ListView) findViewById(R.id.list);
+                l.setClickable(true);
+
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
+                        R.layout.layout, R.id.itemTextView, syringes);
+                l.setAdapter(arrayAdapter);
+
+                l.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        System.out.println("Enter");
+                        ArrayList<Syringe> syringeList = readFromFile();
+                        syringe = syringeList.get(position);
+                        System.out.println(syringe.getName() + " " + syringe.getNumLines());
+
+                    }
+                });
             }
         );
 
+    }
+
+    public ArrayList<Syringe> readFromFile() {
+
+        Gson gson = new Gson();
+        String ret = "";
+
+        try {
+            Context context = getApplicationContext();
+            InputStream inputStream = context.openFileInput("syringes.json");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e);
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e);
+        }
+        Type syringeListType = new TypeToken<ArrayList<Syringe>>(){}.getType();
+        ArrayList<Syringe> readSyringes = gson.fromJson(ret, syringeListType);
+        return readSyringes;
+    }
+
+    public boolean writeToFile(List<Syringe> syringeList, Context context) {
+        Gson gson = new Gson();
+        String json = gson.toJson(syringeList);
+
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("syringes.json", Context.MODE_PRIVATE));
+            outputStreamWriter.write(json);
+            outputStreamWriter.close();
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e);
+            return false;
+        }
+        return true;
     }
 
     public void createResultsDialog(){
