@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -38,8 +39,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +78,8 @@ public abstract class CameraActivity extends AppCompatActivity
 
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
+    private ListView l;
+    private Syringe syringe;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -142,6 +152,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
         startPipeline();
     }
+
 
     /** Callback for Camera2 API */
     @Override
