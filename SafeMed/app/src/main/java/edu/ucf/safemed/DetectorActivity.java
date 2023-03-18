@@ -136,7 +136,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         super.onCreate(savedInstanceState);
 
         List<Syringe> temp = new ArrayList<Syringe>();
-        temp.add(new Syringe("Syringe 1", 18, 20, "ml"));
+        temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
         writeToFile(temp, getApplicationContext());
 
         ArrayList<Syringe> syringeList = readFromFile();
@@ -464,14 +464,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
-            cnt = results.size();
+            cnt = countLines.size();
         }
 
         return cnt;
     }
 
     public int runDetectionAndCountLinesBarrel(YoloV5Classifier detector, Bitmap cropCopyBitmap, String type, long currTimestamp){
-        int cnt = -1;
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
 
@@ -481,10 +480,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
-            cnt = results.size();
+            return countLines.size();
         }
 
-        return cnt;
+        return -1;
     }
 
     @Override
