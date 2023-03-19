@@ -426,7 +426,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     public void drawBoundingBox(List<Classifier.Recognition> results, Bitmap bitmap, long currTimestamp, String filename){
-        trackingOverlay.postInvalidate();
         final Canvas canvas = new Canvas(bitmap);
         final Paint paint = new Paint();
         paint.setColor(Color.RED);
@@ -449,10 +448,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             }
         }
 
-        tracker.trackResults(mappedRecognitions, currTimestamp);
         if (filename != null)
             LOGGER.info("Saving line count detection: " + saveToInternalStorage(bitmap, filename));
-        trackingOverlay.postInvalidate();
     }
 
     public Bitmap padBitmap(Bitmap bitmap) {
@@ -486,20 +483,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         return cnt;
     }
 
-    public int runDetectionAndCountLinesBarrel(YoloV5Classifier detector, Bitmap cropCopyBitmap, String type, long currTimestamp){
+    public Bitmap findBarrel(YoloV5Classifier detector, Bitmap cropCopyBitmap){
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
         Classifier.Recognition boundingBox = results.size() == 0 ? null : results.get(0);
-
-        if (boundingBox != null){
-            runOnUiThread(() -> { openDialog(); });
-            Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
-            List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
-            LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
-            drawBoundingBox(countLines, cropCopyBitmap, currTimestamp, type + "lines.jpg");
-            return countLines.size();
-        }
-
-        return -1;
+        Bitmap croppedImage = boundingBox == null ? null : cropToBoundingBox(cropCopyBitmap, boundingBox, "barrelActual.jpg", "barrelCrop.jpg");
+        return croppedImage;
     }
 
     @Override
@@ -530,11 +518,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         runInBackground(
                     () -> {
                         cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
-                        int barrelLines = runDetectionAndCountLinesBarrel(detector, cropCopyBitmap, "barrel", currTimestamp);
 
-                        if (barrelLines != -1) {
+                        Bitmap barrelImage = findBarrel(detector, cropCopyBitmap);
 
-                            int plungerLines = runDetectionAndCountLines(detectorPlunger, cropCopyBitmap, "plunger", currTimestamp);
+                        if (barrelImage != null) {
+                            runOnUiThread(() -> { openDialog(); });
+
+                            int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
                             double eps = 1e-9;
                             double result = (plungerLines / (syringe.getNumLines() + eps));
                             LOGGER.info("Total volume ratio is: " + result);
