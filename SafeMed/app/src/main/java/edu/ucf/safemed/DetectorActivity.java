@@ -476,8 +476,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         if (boundingBox != null){
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
-            List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             Bitmap padded = padBitmap(croppedImage);
+            List<Classifier.Recognition> countLines = detectorLines.recognizeImage(padded);
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, padded, currTimestamp, type + "lines.jpg");
             cnt = countLines.size();
