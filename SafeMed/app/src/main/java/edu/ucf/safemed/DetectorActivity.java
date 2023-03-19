@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
@@ -424,9 +425,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         return croppedBarrelDetect;
     }
 
-    public void drawBoundingBox(List<Classifier.Recognition> results, long currTimestamp, String filename){
+    public void drawBoundingBox(List<Classifier.Recognition> results, Bitmap bitmap, long currTimestamp, String filename){
         trackingOverlay.postInvalidate();
-        final Canvas canvas = new Canvas(cropCopyBitmap);
+        final Canvas canvas = new Canvas(bitmap);
         final Paint paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStyle(Style.STROKE);
@@ -450,8 +451,22 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         tracker.trackResults(mappedRecognitions, currTimestamp);
         if (filename != null)
-            LOGGER.info("Saving line count detection: " + saveToInternalStorage(cropCopyBitmap, filename));
+            LOGGER.info("Saving line count detection: " + saveToInternalStorage(bitmap, filename));
         trackingOverlay.postInvalidate();
+    }
+
+    public Bitmap padBitmap(Bitmap bitmap) {
+        int paddingLeft = (416 - bitmap.getWidth()) / 2;
+        int paddingRight = 416 - (paddingLeft + (416 - bitmap.getWidth()) % 2);
+        int paddingTop = (416 - bitmap.getHeight()) / 2;
+        int paddingBottom = 416 - (paddingTop + (416 - bitmap.getHeight()) % 2);
+        System.out.println("Stuff " + paddingLeft + " " + paddingRight + " " + paddingTop + " " + paddingBottom + " " + bitmap.getHeight() + " " + bitmap.getWidth());
+        Bitmap outputBitmap = Bitmap.createBitmap(416, 416, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+        canvas.drawColor(Color.BLUE);
+        canvas.drawBitmap(bitmap, null, new Rect(paddingLeft,paddingTop,paddingRight, paddingBottom), null);
+        LOGGER.info("Saving padded image: " + saveToInternalStorage(outputBitmap, "paddedImage.jpg"));
+        return outputBitmap;
     }
 
     public int runDetectionAndCountLines(YoloV5Classifier detector, Bitmap cropCopyBitmap, String type, long currTimestamp){
@@ -462,8 +477,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         if (boundingBox != null){
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
+            Bitmap padded = padBitmap(croppedImage);
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
-            drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
+            drawBoundingBox(countLines, padded, currTimestamp, type + "lines.jpg");
             cnt = countLines.size();
         }
 
@@ -479,7 +495,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             List<Classifier.Recognition> countLines = detectorLines.recognizeImage(croppedImage);
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
-            drawBoundingBox(countLines, currTimestamp, type + "lines.jpg");
+            drawBoundingBox(countLines, cropCopyBitmap, currTimestamp, type + "lines.jpg");
             return countLines.size();
         }
 
