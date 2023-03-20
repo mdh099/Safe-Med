@@ -141,15 +141,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        List<Syringe> temp = new ArrayList<Syringe>();
-        temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
-        writeToFile(temp, getApplicationContext());
-
         TextView textView = new TextView(getApplicationContext());
         textView.setText("Syringe List");
 
-
-        ArrayList<Syringe> syringeList = readFromFile();
+        syringeList = readFromFile();
         String [] syringes = new String[syringeList.size()];
         sL = new ArrayList<>();
         if (syringes.length == 0) {
@@ -298,6 +293,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 syringeList.add(newSyringe);
                 sL.add(name);
                 arrayAdapter.notifyDataSetChanged();
+                LOGGER.info("Added " + name + " to syringe list.");
 
                 newSyringe.writeToFile(syringeList, getApplicationContext());
                 syringeDialog.dismiss();
