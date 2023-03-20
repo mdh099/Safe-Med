@@ -157,7 +157,7 @@ public abstract class CameraActivity extends AppCompatActivity
     /** Callback for Camera2 API */
     @Override
     public void onImageAvailable(final ImageReader reader) {
-
+        if (isProcessingFrame) return;
         // We need wait until we have some size from onPreviewSizeChosen
         if (previewWidth == 0 || previewHeight == 0) {
             return;
@@ -176,6 +176,7 @@ public abstract class CameraActivity extends AppCompatActivity
             Trace.beginSection("imageAvailable");
             final Plane[] planes = image.getPlanes();
             fillBytes(planes, yuvBytes);
+
             yRowStride = planes[0].getRowStride();
             final int uvRowStride = planes[1].getRowStride();
             final int uvPixelStride = planes[1].getPixelStride();

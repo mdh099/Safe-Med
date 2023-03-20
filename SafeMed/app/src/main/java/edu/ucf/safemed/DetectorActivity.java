@@ -137,7 +137,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         super.onCreate(savedInstanceState);
 
         List<Syringe> temp = new ArrayList<Syringe>();
-        temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
+        for (int i = 0; i < 10; i++) {
+            temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
+        }
         writeToFile(temp, getApplicationContext());
 
         ArrayList<Syringe> syringeList = readFromFile();
@@ -497,7 +499,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         trackingOverlay.postInvalidate();
 
         // No mutex needed as this method is not reentrant.
-        if (computingDetection) {
+        if (computingDetection || !startInferenceButtonClicked) {
             readyForNextImage();
             return;
         }
