@@ -42,6 +42,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -106,6 +107,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private ListView l;
     private Syringe syringe;
 
+    private ArrayList<String> sL;
+
+    ArrayAdapter<String> arrayAdapter;
+
     public void openDialog(){
         if (camera2Fragment != null){
             camera2Fragment.onPause();
@@ -125,7 +130,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         runOnUiThread(() -> {
                 LOGGER.info("REACHED: " + value);
                 if (value != null) {
-                    value.setText("" + valueToDisplay);
+                    value.setText("" + String.format("%.2f", valueToDisplay) + " " + syringe.getUnits());
                     LOGGER.info("UPDATING: " + valueToDisplay);
                 }
                 resultsDialog.show();
@@ -142,8 +147,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         }
         writeToFile(temp, getApplicationContext());
 
+        TextView textView = new TextView(getApplicationContext());
+        textView.setText("Syringe List");
+
+
         ArrayList<Syringe> syringeList = readFromFile();
         String [] syringes = new String[syringeList.size()];
+        sL = new ArrayList<>();
         if (syringes.length == 0) {
             syringe = null;
         }
@@ -155,6 +165,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             String syringeStr = syringeList.get(i).getName();
             System.out.println(syringeStr);
             syringes[i] = syringeStr;
+            sL.add(syringeStr);
         }
 
         runOnUiThread(() -> {
@@ -175,15 +186,17 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 l = (ListView) findViewById(R.id.list);
                 l.setClickable(true);
 
-                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
-                        R.layout.layout, R.id.itemTextView, syringes);
+                arrayAdapter = new ArrayAdapter<String>(this,
+                        R.layout.layout, R.id.itemTextView, sL);
                 l.setAdapter(arrayAdapter);
+//                l.addHeaderView(textView);
 
                 l.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         System.out.println("Enter");
                         ArrayList<Syringe> syringeList = readFromFile();
+                        System.out.println("The position is " + position + " The id is " + id + " SyringeList size " + syringeList.size());
                         syringe = syringeList.get(position);
                         System.out.println(syringe.getName() + " " + syringe.getNumLines());
 
@@ -285,6 +298,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                 Syringe newSyringe = new Syringe(name, numberOfLines, volume, units);
                 syringeList.add(newSyringe);
+                sL.add(name);
+                arrayAdapter.notifyDataSetChanged();
 
                 newSyringe.writeToFile(syringeList, getApplicationContext());
                 syringeDialog.dismiss();
@@ -468,6 +483,26 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         return outputBitmap;
     }
 
+    public ArrayList<Classifier.Recognition> handleOverlap(ArrayList<Classifier.Recognition> lines){
+        boolean[] keep = new boolean[lines.size()];
+        double threshold = 0.3;
+        Arrays.fill(keep, true);
+        for (int i = 0; i < lines.size(); i++){
+            if (!keep[i]) continue;
+            for (int j = i + 1; j < lines.size(); j++) {
+                if (!keep[i] || !keep[j]) continue;
+                if (detector.box_iou(lines.get(i).getLocation(), lines.get(j).getLocation()) > threshold) {
+                    keep[j] = false;
+                }
+            }
+        }
+        ArrayList<Classifier.Recognition> temp = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++)
+            if (keep[i])
+                temp.add(lines.get(i));
+        return temp;
+    }
+
     public int runDetectionAndCountLines(YoloV5Classifier detector, Bitmap cropCopyBitmap, String type, long currTimestamp){
         int cnt = 0;
         final List<Classifier.Recognition> results = detector.recognizeImage(cropCopyBitmap);
@@ -476,7 +511,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         if (boundingBox != null){
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
             Bitmap padded = padBitmap(croppedImage);
-            List<Classifier.Recognition> countLines = detectorLines.recognizeImage(padded);
+            List<Classifier.Recognition> countLines = handleOverlap(detectorLines.recognizeImage(padded));
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, padded, currTimestamp, type + "lines.jpg");
             cnt = countLines.size();
@@ -527,9 +562,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                             runOnUiThread(() -> { openDialog(); });
 
                             int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
-                            double eps = 1e-9;
-                            double result = (plungerLines / (syringe.getNumLines() + eps));
-                            LOGGER.info("Total volume ratio is: " + result);
+                            double result = (plungerLines / (syringe.getNumLines()));
+                            LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
 
                             runOnUiThread(() -> {
                                     dismissDialog();

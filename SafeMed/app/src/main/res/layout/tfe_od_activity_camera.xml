@@ -47,10 +47,7 @@
             android:layout_width="400dp"
             android:layout_height="200dp"
             android:clickable="true"
-            android:translationY="300dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:translationY="300dp" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
