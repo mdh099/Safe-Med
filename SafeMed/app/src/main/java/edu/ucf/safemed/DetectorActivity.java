@@ -142,9 +142,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         super.onCreate(savedInstanceState);
 
         List<Syringe> temp = new ArrayList<Syringe>();
-        for (int i = 0; i < 10; i++) {
-            temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
-        }
+        temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
         writeToFile(temp, getApplicationContext());
 
         TextView textView = new TextView(getApplicationContext());
