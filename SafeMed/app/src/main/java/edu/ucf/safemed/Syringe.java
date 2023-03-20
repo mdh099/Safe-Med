@@ -65,6 +65,10 @@ public class Syringe {
         return numLines;
     }
 
+    public String getUnits() {
+        return volumeUnit;
+    }
+
     public void setNumLines(double numLines) {
         this.numLines = numLines;
     }

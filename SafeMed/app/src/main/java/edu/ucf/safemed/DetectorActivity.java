@@ -125,7 +125,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         runOnUiThread(() -> {
                 LOGGER.info("REACHED: " + value);
                 if (value != null) {
-                    value.setText("" + valueToDisplay);
+                    value.setText("" + String.format("%.2f", valueToDisplay) + " " + syringe.getUnits());
                     LOGGER.info("UPDATING: " + valueToDisplay);
                 }
                 resultsDialog.show();
@@ -526,8 +526,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                             int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
                             double eps = 1e-9;
-                            double result = (plungerLines / (syringe.getNumLines() + eps));
-                            LOGGER.info("Total volume ratio is: " + result);
+                            double result = (plungerLines / (syringe.getNumLines()));
+                            LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
 
                             runOnUiThread(() -> {
                                     dismissDialog();
