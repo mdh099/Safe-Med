@@ -107,6 +107,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private ListView l;
     private Syringe syringe;
 
+    private ArrayList<String> sL;
+
+    ArrayAdapter<String> arrayAdapter;
+
     public void openDialog(){
         if (camera2Fragment != null){
             camera2Fragment.onPause();
@@ -141,8 +145,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         temp.add(new Syringe("Syringe 1", 20, 10, "ml"));
         writeToFile(temp, getApplicationContext());
 
+        TextView textView = new TextView(getApplicationContext());
+        textView.setText("Syringe List");
+
+
         ArrayList<Syringe> syringeList = readFromFile();
         String [] syringes = new String[syringeList.size()];
+        sL = new ArrayList<>();
         if (syringes.length == 0) {
             syringe = null;
         }
@@ -154,6 +163,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             String syringeStr = syringeList.get(i).getName();
             System.out.println(syringeStr);
             syringes[i] = syringeStr;
+            sL.add(syringeStr);
         }
 
         runOnUiThread(() -> {
@@ -174,15 +184,17 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 l = (ListView) findViewById(R.id.list);
                 l.setClickable(true);
 
-                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
-                        R.layout.layout, R.id.itemTextView, syringes);
+                arrayAdapter = new ArrayAdapter<String>(this,
+                        R.layout.layout, R.id.itemTextView, sL);
                 l.setAdapter(arrayAdapter);
+//                l.addHeaderView(textView);
 
                 l.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         System.out.println("Enter");
                         ArrayList<Syringe> syringeList = readFromFile();
+                        System.out.println("The position is " + position + " The id is " + id + " SyringeList size " + syringeList.size());
                         syringe = syringeList.get(position);
                         System.out.println(syringe.getName() + " " + syringe.getNumLines());
 
@@ -284,6 +296,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                 Syringe newSyringe = new Syringe(name, numberOfLines, volume, units);
                 syringeList.add(newSyringe);
+                sL.add(name);
+                arrayAdapter.notifyDataSetChanged();
 
                 newSyringe.writeToFile(syringeList, getApplicationContext());
                 syringeDialog.dismiss();

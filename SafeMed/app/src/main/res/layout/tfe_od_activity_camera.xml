@@ -44,11 +44,15 @@
 
         <ListView
             android:id="@+id/list"
-            android:layout_width="412dp"
-            android:layout_height="123dp"
+            android:layout_width="417dp"
+            android:layout_height="100dp"
             android:background="#F5F7F8"
             android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="@id/container" />
+            android:divider="@color/black"
+            android:dividerHeight="2dp"
+            android:listSelector="@color/color_Blue_Light"
+            app:layout_constraintBottom_toBottomOf="@id/container"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
