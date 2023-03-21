@@ -13,7 +13,7 @@ public class DetectorFactory {
             throws IOException {
         String labelFilename = null;
         boolean isQuantized = false;
-        int inputSize = 416;
+        int inputSize = Constants.input_size;
         int[] output_width = new int[]{80, 40, 20};
         int[][]  masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
         int[] anchors = new int[]{
