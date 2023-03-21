@@ -19,6 +19,8 @@ import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -100,6 +102,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private FloatingActionButton startInferenceButton;
 
     private TextView value;
+    private View progress;
 
     private List<Syringe> syringeList = new ArrayList<>();
     private String name = null, volume = null, units = null, numberOfLines = null;
@@ -125,11 +128,20 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     public void resultsDialog(double valueToDisplay){
         runOnUiThread(() -> {
                 LOGGER.info("REACHED: " + value);
+                // from -1f to 0f
+                float desiredPercentage = (float)-(1 - valueToDisplay);
+                TranslateAnimation anim = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, -1,
+                        Animation.RELATIVE_TO_PARENT, desiredPercentage, Animation.RELATIVE_TO_PARENT,
+                        0, Animation.RELATIVE_TO_PARENT, 0);
+                anim.setDuration(3000);
+                anim.setFillAfter(true);
                 if (value != null) {
-                    value.setText("" + String.format("%.2f", valueToDisplay) + " " + syringe.getUnits());
+                    value.setText("" + String.format("%.2f", valueToDisplay * syringe.getVolume()) + " " + syringe.getUnits());
                     LOGGER.info("UPDATING: " + valueToDisplay);
                 }
                 resultsDialog.show();
+                progress.startAnimation(anim);
+                progress.setVisibility(View.VISIBLE);
             });
     }
 
@@ -247,7 +259,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         View view = getLayoutInflater().inflate(R.layout.results_dialog, null);
         value = view.findViewById(R.id.result);
         Button resultsSubmit = view.findViewById(R.id.results_submit);
-
+        progress = view.findViewById(R.id.progress);
         resultsSubmit.setOnClickListener(v ->  {
             if (camera2Fragment != null){
                 camera2Fragment.onResume();
@@ -551,7 +563,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                             runOnUiThread(() -> {
                                     dismissDialog();
-                                    resultsDialog(result * syringe.getVolume());
+                                    resultsDialog(result);
                                 }
                             );
                         }
