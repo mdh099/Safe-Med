@@ -3,6 +3,7 @@ package edu.ucf.safemed;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -15,6 +16,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
@@ -153,10 +155,19 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPrefs.getBoolean("firstStart", true)) {
+            onFirstLaunch();
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putBoolean("firstStart", false);
+            editor.apply();
+        }
+
         TextView textView = new TextView(getApplicationContext());
         textView.setText("Syringe List");
 
-        syringeList = readFromFile();
+        syringeList = readSyringesFromFile();
+
         String [] syringes = new String[syringeList.size()];
         sL = new ArrayList<>();
         if (syringes.length == 0) {
@@ -200,7 +211,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         System.out.println("Enter");
-                        ArrayList<Syringe> syringeList = readFromFile();
+                        ArrayList<Syringe> syringeList = readSyringesFromFile();
                         System.out.println("The position is " + position + " The id is " + id + " SyringeList size " + syringeList.size());
                         syringe = syringeList.get(position);
                         System.out.println(syringe.getName() + " " + syringe.getNumLines());
@@ -212,7 +223,14 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     }
 
-    public ArrayList<Syringe> readFromFile() {
+    public void onFirstLaunch() {
+        syringeList.add(new Syringe("3 mL", 30, 3, "mL"));
+        syringeList.add(new Syringe("5 mL", 25, 5, "mL"));
+        syringeList.add(new Syringe("10 mL", 50, 10, "mL"));
+        writeSyringesToFile(syringeList, getApplicationContext());
+    }
+
+    public ArrayList<Syringe> readSyringesFromFile() {
 
         Gson gson = new Gson();
         String ret = "";
@@ -245,7 +263,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         return readSyringes;
     }
 
-    public boolean writeToFile(List<Syringe> syringeList, Context context) {
+    public boolean writeSyringesToFile(List<Syringe> syringeList, Context context) {
         Gson gson = new Gson();
         String json = gson.toJson(syringeList);
 
@@ -307,7 +325,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 arrayAdapter.notifyDataSetChanged();
                 LOGGER.info("Added " + name + " to syringe list.");
 
-                newSyringe.writeToFile(syringeList, getApplicationContext());
+                writeSyringesToFile(syringeList, getApplicationContext());
                 syringeDialog.dismiss();
             }
         });
