@@ -26,7 +26,7 @@
             android:layout_centerInParent="true"
             android:layout_margin="10dp"
             android:background="@android:color/white"
-            android:rotation="90"
+            android:rotation="270"
             android:scaleX="0.20"
             android:scaleY="0.7"
             android:translationY="100dp"

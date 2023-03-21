@@ -568,6 +568,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                             runOnUiThread(() -> { openDialog(); });
 
                             int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
+
                             double result = (plungerLines / (syringe.getNumLines()));
                             LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
 
