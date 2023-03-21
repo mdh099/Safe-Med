@@ -47,6 +47,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -494,12 +495,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     public Bitmap padBitmap(Bitmap bitmap) {
-        int paddingLeft = (416 - bitmap.getWidth()) / 2;
-        int paddingRight = 416 - (paddingLeft + (416 - bitmap.getWidth()) % 2);
-        int paddingTop = (416 - bitmap.getHeight()) / 2;
-        int paddingBottom = 416 - (paddingTop + (416 - bitmap.getHeight()) % 2);
+        int paddingLeft = (Constants.input_size - bitmap.getWidth()) / 2;
+        int paddingRight = Constants.input_size - (paddingLeft + (Constants.input_size - bitmap.getWidth()) % 2);
+        int paddingTop = (Constants.input_size - bitmap.getHeight()) / 2;
+        int paddingBottom = Constants.input_size - (paddingTop + (Constants.input_size - bitmap.getHeight()) % 2);
         System.out.println("Stuff " + paddingLeft + " " + paddingRight + " " + paddingTop + " " + paddingBottom + " " + bitmap.getHeight() + " " + bitmap.getWidth());
-        Bitmap outputBitmap = Bitmap.createBitmap(416, 416, Bitmap.Config.ARGB_8888);
+        Bitmap outputBitmap = Bitmap.createBitmap(Constants.input_size, Constants.input_size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(outputBitmap);
         canvas.drawColor(Color.BLUE);
         canvas.drawBitmap(bitmap, null, new Rect(paddingLeft,paddingTop,paddingRight, paddingBottom), null);
@@ -526,6 +527,20 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 temp.add(lines.get(i));
         return temp;
     }
+//
+//    public int countLines(ArrayList<Classifier.Recognition> lines) {
+//        Collections.sort(lines, (a, b) -> {
+//            return (int)(a.getLocation().bottom - b.getLocation().bottom);
+//        });
+//
+//        int smallestDiff = Integer.MAX_VALUE;
+//        for (int i = 1; i < lines.size(); i++){
+//            smallestDiff = lines.get(i).getLocation().bottom - lines.get(i - 1).getLocation().bottom;
+//        }
+//
+//        int count = lines.size();
+//
+//    }
 
     public int runDetectionAndCountLines(YoloV5Classifier detector, Bitmap cropCopyBitmap, String type, long currTimestamp){
         int cnt = 0;
