@@ -591,30 +591,44 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             ImageUtils.saveBitmap(croppedBitmap);
         }
 
+
         runInBackground(
-                    () -> {
-                        cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
+                () -> {
+                    cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
 
-                        Bitmap barrelImage = findBarrel(detector, cropCopyBitmap);
+//                        Bitmap barrelImage = findBarrel(detector, cropCopyBitmap);
+//
+//                        if (barrelImage != null) {
+//                            runOnUiThread(() -> { openDialog(); });
+//
+//                            int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
+//
+//                            double result = (plungerLines / (syringe.getNumLines()));
+//                            LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
+//
+//                            runOnUiThread(() -> {
+//                                    dismissDialog();
+//                                    resultsDialog(result);
+//                                }
+//                            );
+//                        }
 
-                        if (barrelImage != null) {
-                            runOnUiThread(() -> { openDialog(); });
+                    runOnUiThread(() -> { openDialog(); });
+                    List<Classifier.Recognition> countLines = handleOverlap(detectorLines.recognizeImage(cropCopyBitmap));
+                    drawBoundingBox(countLines, cropCopyBitmap, currTimestamp,  "generallines.jpg");
+                    int plungerLines =  countLines.size();
+                    double result = (plungerLines / (syringe.getNumLines()));
+                    LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
 
-                            int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
+                    runOnUiThread(() -> {
+                                dismissDialog();
+                                resultsDialog(result);
+                            }
+                    );
 
-                            double result = (plungerLines / (syringe.getNumLines()));
-                            LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
-
-                            runOnUiThread(() -> {
-                                    dismissDialog();
-                                    resultsDialog(result);
-                                }
-                            );
-                        }
-
-                        computingDetection = false;
-                        startInferenceButtonClicked = false;
-                    });
+                    computingDetection = false;
+                    startInferenceButtonClicked = false;
+                });
     }
 }
 
