@@ -366,9 +366,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         tracker = new MultiBoxTracker(this);
 
         try {
-            detector = DetectorFactory.getDetector(getAssets(), Constants.BARREL_DETECT_MODEL);
-            detectorLines = DetectorFactory.getDetector(getAssets(), Constants.LINE_DETECT_MODEL);
-            detectorPlunger = DetectorFactory.getDetector(getAssets(), Constants.PLUNGER_DETECT_MODEL);
+            detector = DetectorFactory.getDetector(getAssets(), Constants.BARREL_DETECT_MODEL, Constants.barrel_input_size);
+            detectorLines = DetectorFactory.getDetector(getAssets(), Constants.LINE_DETECT_MODEL, Constants.line_input_size);
+            detectorPlunger = DetectorFactory.getDetector(getAssets(), Constants.PLUNGER_DETECT_MODEL, Constants.plunger_input_size);
         } catch (final IOException e) {
             e.printStackTrace();
             LOGGER.info(e + "Exception initializing classifier!");
@@ -494,13 +494,13 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             LOGGER.info("Saving line count detection: " + saveToInternalStorage(bitmap, filename));
     }
 
-    public Bitmap padBitmap(Bitmap bitmap) {
-        int paddingLeft = (Constants.input_size - bitmap.getWidth()) / 2;
-        int paddingRight = Constants.input_size - (paddingLeft + (Constants.input_size - bitmap.getWidth()) % 2);
-        int paddingTop = (Constants.input_size - bitmap.getHeight()) / 2;
-        int paddingBottom = Constants.input_size - (paddingTop + (Constants.input_size - bitmap.getHeight()) % 2);
+    public Bitmap padBitmap(Bitmap bitmap, int input_size) {
+        int paddingLeft = (input_size - bitmap.getWidth()) / 2;
+        int paddingRight = input_size - (paddingLeft + (input_size - bitmap.getWidth()) % 2);
+        int paddingTop = (input_size - bitmap.getHeight()) / 2;
+        int paddingBottom = input_size - (paddingTop + (input_size - bitmap.getHeight()) % 2);
         System.out.println("Stuff " + paddingLeft + " " + paddingRight + " " + paddingTop + " " + paddingBottom + " " + bitmap.getHeight() + " " + bitmap.getWidth());
-        Bitmap outputBitmap = Bitmap.createBitmap(Constants.input_size, Constants.input_size, Bitmap.Config.ARGB_8888);
+        Bitmap outputBitmap = Bitmap.createBitmap(input_size, input_size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(outputBitmap);
         canvas.drawColor(Color.BLUE);
         canvas.drawBitmap(bitmap, null, new Rect(paddingLeft,paddingTop,paddingRight, paddingBottom), null);
@@ -549,7 +549,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         if (boundingBox != null){
             Bitmap croppedImage = cropToBoundingBox(cropCopyBitmap, boundingBox, type + "Actual.jpg", type + "Crop.jpg");
-            Bitmap padded = padBitmap(croppedImage);
+            Bitmap padded = padBitmap(croppedImage, Constants.line_input_size);
             List<Classifier.Recognition> countLines = handleOverlap(detectorLines.recognizeImage(padded));
             LOGGER.info("Results from counting lines on " + type +  ": " + countLines.size());
             drawBoundingBox(countLines, padded, currTimestamp, type + "lines.jpg");
@@ -596,35 +596,35 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 () -> {
                     cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
 
-//                        Bitmap barrelImage = findBarrel(detector, cropCopyBitmap);
-//
-//                        if (barrelImage != null) {
-//                            runOnUiThread(() -> { openDialog(); });
-//
-//                            int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage), "plunger", currTimestamp);
-//
-//                            double result = (plungerLines / (syringe.getNumLines()));
-//                            LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
-//
-//                            runOnUiThread(() -> {
-//                                    dismissDialog();
-//                                    resultsDialog(result);
-//                                }
-//                            );
-//                        }
+                        Bitmap barrelImage = findBarrel(detector, cropCopyBitmap);
 
-                    runOnUiThread(() -> { openDialog(); });
-                    List<Classifier.Recognition> countLines = handleOverlap(detectorLines.recognizeImage(cropCopyBitmap));
-                    drawBoundingBox(countLines, cropCopyBitmap, currTimestamp,  "generallines.jpg");
-                    int plungerLines =  countLines.size();
-                    double result = (plungerLines / (syringe.getNumLines()));
-                    LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
+                        if (barrelImage != null) {
+                            runOnUiThread(() -> { openDialog(); });
 
-                    runOnUiThread(() -> {
-                                dismissDialog();
-                                resultsDialog(result);
-                            }
-                    );
+                            int plungerLines = runDetectionAndCountLines(detectorPlunger, padBitmap(barrelImage, Constants.plunger_input_size), "plunger", currTimestamp);
+
+                            double result = (plungerLines / (syringe.getNumLines()));
+                            LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
+
+                            runOnUiThread(() -> {
+                                    dismissDialog();
+                                    resultsDialog(result);
+                                }
+                            );
+                        }
+
+//                    runOnUiThread(() -> { openDialog(); });
+//                    List<Classifier.Recognition> countLines = handleOverlap(detectorLines.recognizeImage(cropCopyBitmap));
+//                    drawBoundingBox(countLines, cropCopyBitmap, currTimestamp,  "generallines.jpg");
+//                    int plungerLines =  countLines.size();
+//                    double result = (plungerLines / (syringe.getNumLines()));
+//                    LOGGER.info("Total volume ratio is: " + result + " " + plungerLines + " " + syringe.getNumLines());
+//
+//                    runOnUiThread(() -> {
+//                                dismissDialog();
+//                                resultsDialog(result);
+//                            }
+//                    );
 
                     computingDetection = false;
                     startInferenceButtonClicked = false;
