@@ -392,6 +392,7 @@ public class YoloV5Classifier implements Classifier {
         imageCounter++;
         System.out.println("Starting image: " + imageCounter);
         ByteBuffer byteBuffer = convertBitmapToByteBuffer(bitmap);
+        System.out.println(byteBuffer.array().length);
         ArrayList<Recognition> detections = new ArrayList<Recognition>();
         Map<Integer, Object> outputMap = new HashMap<>();
         outputMap.put(0, new float[1][output_box][4]);

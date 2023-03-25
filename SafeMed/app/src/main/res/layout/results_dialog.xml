@@ -27,9 +27,9 @@
             android:layout_margin="10dp"
             android:background="@android:color/white"
             android:rotation="90"
-            android:scaleX="0.20"
-            android:scaleY="0.7"
-            android:translationY="100dp"
+            android:scaleX="0.3"
+            android:scaleY="1"
+            android:translationY="150dp"
             android:visibility="visible">
 
             <View

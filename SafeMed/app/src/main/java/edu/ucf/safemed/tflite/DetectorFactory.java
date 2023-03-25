@@ -9,11 +9,13 @@ import edu.ucf.safemed.Constants;
 public class DetectorFactory {
     public static YoloV5Classifier getDetector(
             final AssetManager assetManager,
-            final String modelFilename)
+            final String modelFilename,
+            final int size
+    )
             throws IOException {
         String labelFilename = null;
         boolean isQuantized = false;
-        int inputSize = Constants.input_size;
+        int inputSize = size;
         int[] output_width = new int[]{80, 40, 20};
         int[][]  masks = new int[][]{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
         int[] anchors = new int[]{
