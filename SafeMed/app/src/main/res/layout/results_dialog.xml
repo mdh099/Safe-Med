@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:hint="Result"
+            android:hint="Results"
             android:textSize="20dp"
             android:translationY="30dp" />
 
@@ -27,9 +27,9 @@
             android:layout_margin="10dp"
             android:background="@android:color/white"
             android:rotation="90"
-            android:scaleX="0.3"
+            android:scaleX="0.36"
             android:scaleY="1"
-            android:translationY="150dp"
+            android:translationY="146dp"
             android:visibility="visible">
 
             <View

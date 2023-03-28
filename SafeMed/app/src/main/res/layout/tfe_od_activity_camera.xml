@@ -44,7 +44,7 @@
 
         <ListView
             android:id="@+id/list"
-            android:layout_width="417dp"
+            android:layout_width="415dp"
             android:layout_height="100dp"
             android:background="#F5F7F8"
             android:clickable="true"
@@ -60,6 +60,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/tfe_semi_transparent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -67,6 +68,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:src="@drawable/safemed_banner" />
 
         </androidx.appcompat.widget.Toolbar>
@@ -75,7 +78,7 @@
             android:id="@+id/info_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="334dp"
+            android:layout_marginStart="300dp"
             android:layout_marginTop="80dp"
             android:clickable="true"
             android:padding="80dp"
@@ -90,7 +93,7 @@
             android:id="@+id/add_syringe_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="334dp"
+            android:layout_marginStart="300dp"
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:padding="80dp"
@@ -104,7 +107,7 @@
             android:id="@+id/start_inference_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="334dp"
+            android:layout_marginStart="300dp"
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:padding="80dp"
