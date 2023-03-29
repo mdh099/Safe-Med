@@ -24,6 +24,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/holo_blue_light"
+            android:scaleX="-0.5"
+            android:scaleY=".7"
             android:visibility="invisible"
             app:layout_constraintStart_toStartOf="@id/syringe"
             app:layout_constraintHorizontal_bias=".2"
